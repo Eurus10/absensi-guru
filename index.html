@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>E-Presensi Guru v2.3</title>
+    <title>E-Presensi Guru v2.4</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -17,37 +17,19 @@
     
     <style>
         :root { --primary: #6366f1; --success: #22c55e; --danger: #ef4444; }
-        
-        body { 
-            margin: 0; min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif;
-            background: linear-gradient(-45deg, #6366f1, #a855f7, #ec4899);
-            background-size: 400% 400%;
-            animation: gradientBG 10s ease infinite;
-            display: flex; align-items: center; justify-content: center;
-            overscroll-behavior: none;
-        }
+        body { margin: 0; min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif; background: linear-gradient(-45deg, #6366f1, #a855f7, #ec4899); background-size: 400% 400%; animation: gradientBG 10s ease infinite; display: flex; align-items: center; justify-content: center; overscroll-behavior: none; }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
-        .app-shell { 
-            width: 100%; max-width: 430px; height: 92vh; background: rgba(255, 255, 255, 0.92); 
-            backdrop-filter: blur(15px); border-radius: 35px; overflow-y: auto; position: relative;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.4);
-        }
-
+        .app-shell { width: 100%; max-width: 430px; height: 92vh; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(15px); border-radius: 35px; overflow-y: auto; position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.4); }
         .school-banner { padding: 25px; text-align: center; background: white; border-radius: 0 0 35px 35px; }
         .school-logo { width: 80px; height: 80px; border-radius: 20px; object-fit: cover; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        
         .camera-container { margin: 20px; border-radius: 30px; overflow: hidden; height: 260px; border: 6px solid white; box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
         #video { width: 100%; height: 100%; object-fit: cover; }
-
         .btn-action { border-radius: 20px; padding: 18px; font-weight: 800; border: none; color: white; margin-bottom: 15px; transition: 0.3s; width: 100%; }
         .btn-masuk { background: linear-gradient(135deg, #10b981, #059669); }
         .btn-pulang { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        
         .history-card { background: white; border-radius: 18px; padding: 15px; margin-bottom: 12px; border-left: 8px solid #eee; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
         .status-telat { border-left-color: var(--danger); }
         .status-tepat { border-left-color: var(--success); }
-
         #login-screen, #setup-account-screen, #main-app, #admin-panel, #profile-page { display: none; }
     </style>
 </head>
@@ -70,7 +52,7 @@
     <div id="main-app">
         <div class="p-4 d-flex justify-content-between align-items-center">
             <div><small class="text-muted">Guru:</small><h5 class="fw-bold m-0" id="user-display">-</h5></div>
-            <img id="mini-avatar" src="" style="width:60px; height:60px; border-radius:50%; border:3px solid white; object-fit:cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor:pointer" onclick="showProfile()">
+            <img id="mini-avatar" src="" style="width:60px; height:60px; border-radius:50%; border:3px solid white; object-fit:cover; cursor:pointer" onclick="showProfile()">
         </div>
         <div class="camera-container"><video id="video" autoplay playsinline></video></div>
         <div class="px-4 text-center">
@@ -84,7 +66,7 @@
     <div id="profile-page" class="p-4">
         <button class="btn btn-light rounded-circle mb-3 shadow-sm" onclick="showScreen('main-app')"><i class="fas fa-arrow-left"></i></button>
         <div class="text-center mb-4">
-            <img id="profile-avatar" src="" style="width:110px; height:110px; border-radius:50%; border:4px solid white; object-fit:cover; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+            <img id="profile-avatar" src="" style="width:110px; height:110px; border-radius:50%; border:4px solid white; object-fit:cover;">
             <h4 id="profile-name" class="fw-bold mt-3 mb-0">-</h4>
             <div id="profile-jabatan" class="text-muted small">Guru</div>
         </div>
@@ -94,41 +76,44 @@
     </div>
 
     <div id="admin-panel" class="p-4">
-        <div class="bg-primary text-white p-4 rounded-4 mb-4">
-            <h5 class="m-0 fw-bold">Admin Panel</h5>
-            <small>Manajemen Laporan & Sekolah</small>
-        </div>
-        <div class="card p-3 border-0 shadow-sm rounded-4 mb-4">
-            <label class="small fw-bold mb-2">Update Identitas</label>
-            <input type="text" id="admin-school-name" class="form-control mb-2 rounded-3" placeholder="Nama Sekolah">
-            <input type="file" id="admin-school-logo" class="form-control mb-3 rounded-3" accept="image/*">
-            <button class="btn btn-primary w-100 rounded-pill fw-bold" onclick="updateSchool()">Simpan</button>
-        </div>
+        <div class="bg-primary text-white p-4 rounded-4 mb-4"><h5>Admin Panel</h5></div>
         <button class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow" onclick="exportData()">DOWNLOAD REKAP EXCEL</button>
+        <button class="btn btn-link w-100 mt-3" onclick="location.reload()">Kembali</button>
     </div>
 </div>
 
 <canvas id="canvas" style="display:none;"></canvas>
 
 <script>
-// KONFIGURASI SUPABASE (Tetap sama)
 const SUPABASE_URL = 'https://dddbjqnoovjbdesvaulo.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkZGJqcW5vb3ZqYmRlc3ZhdWxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNDAzMTUsImV4cCI6MjA5MDYxNjMxNX0.yLeBX4C8bwpCngvOViMR-eocHVFjv0BXXBuPJWwb9KU';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// KONFIGURASI TITIK SEKOLAH
+const SCHOOL_LAT = -6.250736361618612;
+const SCHOOL_LON = 106.46656879999998;
+const MAX_DISTANCE = 50; // dalam meter
+
 let currentUser = "";
 let schoolLogoBase64 = "";
 
-window.onload = () => {
-    updateClock(); setInterval(updateClock, 1000);
-    loadSchoolData();
-    showScreen('login-screen');
-};
+window.onload = () => { updateClock(); setInterval(updateClock, 1000); loadSchoolData(); showScreen('login-screen'); };
 
 function updateClock() {
     const now = new Date();
     document.getElementById('clock').innerText = now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
     document.getElementById('date').innerText = now.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'});
+}
+
+function hitungJarak(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // Radius bumi dalam meter
+    const φ1 = lat1 * Math.PI/180;
+    const φ2 = lat2 * Math.PI/180;
+    const Δφ = (lat2-lat1) * Math.PI/180;
+    const Δλ = (lon2-lon1) * Math.PI/180;
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
 }
 
 async function loadSchoolData() {
@@ -145,7 +130,6 @@ function showScreen(id) {
     });
 }
 
-// LOGIN & CAMERA (Tetap sama)
 async function handleLogin() {
     const u = document.getElementById('username').value;
     const p = document.getElementById('password').value;
@@ -163,80 +147,70 @@ function startCamera() {
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }).then(s => document.getElementById('video').srcObject = s);
 }
 
-// LOGIKA ABSEN (Jam & Status)
 async function takeAbsen(tipe) {
     const now = new Date();
     const jam = now.getHours();
     const menit = now.getMinutes();
-    
-    let status = (tipe === 'Masuk' && (jam > 7 || (jam === 7 && menit > 0))) ? "Terlambat" : "Tepat Waktu";
+    let statusWaktu = (tipe === 'Masuk' && (jam > 7 || (jam === 7 && menit > 0))) ? "Terlambat" : "Tepat Waktu";
 
     navigator.geolocation.getCurrentPosition(async (pos) => {
+        const userLat = pos.coords.latitude;
+        const userLon = pos.coords.longitude;
+        const jarak = hitungJarak(userLat, userLon, SCHOOL_LAT, SCHOOL_LON);
+
+        if (jarak > MAX_DISTANCE) {
+            alert(`ABSEN DITOLAK!\nJarak Anda: ${Math.round(jarak)}m dari sekolah.\nBatas maksimal: ${MAX_DISTANCE}m.`);
+            return;
+        }
+
         const canvas = document.getElementById('canvas');
         canvas.width = 400; canvas.height = 400;
         canvas.getContext('2d').drawImage(document.getElementById('video'), 0, 0, 400, 400);
         
         await _supabase.from('presensi').insert([{
-            nama_guru: currentUser, tipe: tipe, keterangan: status,
-            foto: canvas.toDataURL('image/webp', 0.5)
+            nama_guru: currentUser, tipe: tipe, keterangan: statusWaktu,
+            foto: canvas.toDataURL('image/webp', 0.5),
+            latitude: userLat, longitude: userLon
         }]);
-        alert("Berhasil: " + status);
-    });
+        alert(`Berhasil! Status: ${statusWaktu}\nJarak ke sekolah: ${Math.round(jarak)}m`);
+    }, (err) => {
+        alert("GPS tidak aktif atau izin ditolak!");
+    }, { enableHighAccuracy: true });
 }
 
-// REKAP EXCEL PREMIUM (Kolom Jam & Warna)
 async function exportData() {
     const { data } = await _supabase.from('presensi').select('*').order('created_at', {ascending: false});
-    
-    // Transformasi Data: Memisahkan Tanggal dan Jam
     const report = data.map(i => {
         const dt = new Date(i.created_at);
         return {
             'Nama Guru': i.nama_guru,
             'Tanggal': dt.toLocaleDateString('id-ID'),
-            'Jam': dt.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}),
+            'Jam': dt.toLocaleTimeString('id-ID'),
             'Tipe': i.tipe,
-            'Status': i.keterangan || 'Hadir'
+            'Status': i.keterangan,
+            'Jarak (Lat,Lon)': `${i.latitude},${i.longitude}`
         };
     });
-
     const ws = XLSX.utils.json_to_sheet(report);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Laporan_Presensi");
-
-    // Catatan: SheetJS versi komunitas tidak mendukung pewarnaan sel secara langsung via JSON.
-    // Namun, kita pastikan kolom terpisah rapi.
-    XLSX.writeFile(wb, "Rekap_Presensi_Guru.xlsx");
+    XLSX.utils.book_append_sheet(wb, ws, "Rekap");
+    XLSX.writeFile(wb, "Rekap_Absensi_v2.4.xlsx");
 }
 
-// LOGIKA PROFIL (Riwayat Warna)
 async function showProfile() {
     showScreen('profile-page');
     const { data: user } = await _supabase.from('profil_guru').select('*').eq('username', currentUser).single();
     document.getElementById('profile-name').innerText = user.nama_lengkap;
     document.getElementById('profile-avatar').src = user.foto_avatar || `https://ui-avatars.com/api/?name=${user.nama_lengkap}`;
-    
     const { data: hist } = await _supabase.from('presensi').select('*').eq('nama_guru', currentUser).order('created_at', {ascending:false}).limit(10);
     document.getElementById('history-list').innerHTML = hist.map(h => `
         <div class="history-card ${h.keterangan === 'Terlambat' ? 'status-telat' : 'status-tepat'} shadow-sm">
             <div class="d-flex justify-content-between">
                 <div><b>${h.tipe}</b><br><small class="text-muted">${new Date(h.created_at).toLocaleString('id-ID')}</small></div>
-                <span class="badge ${h.keterangan === 'Terlambat' ? 'bg-danger' : 'bg-success'} rounded-pill align-self-center">${h.keterangan || 'Hadir'}</span>
+                <span class="badge ${h.keterangan === 'Terlambat' ? 'bg-danger' : 'bg-success'} rounded-pill align-self-center">${h.keterangan}</span>
             </div>
         </div>
     `).join('');
-}
-
-// ADMIN UPLOAD (Base64)
-document.getElementById('admin-school-logo').onchange = (e) => {
-    const r = new FileReader(); r.onload = (ev) => schoolLogoBase64 = ev.target.result;
-    r.readAsDataURL(e.target.files[0]);
-};
-async function updateSchool() {
-    const p = { id: 1, nama_sekolah: document.getElementById('admin-school-name').value };
-    if(schoolLogoBase64) p.logo_url = schoolLogoBase64;
-    await _supabase.from('pengaturan').upsert(p);
-    alert("Berhasil!"); location.reload();
 }
 </script>
 </body>
