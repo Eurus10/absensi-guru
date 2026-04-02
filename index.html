@@ -3,13 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>E-Presensi Guru v2.4</title>
+    <title>E-Presensi Guru v2.5</title>
     
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://your-logo-url.com/logo.png">
-    <link rel="icon" href="https://your-logo-url.com/logo.png">
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -19,18 +14,24 @@
         :root { --primary: #6366f1; --success: #22c55e; --danger: #ef4444; }
         body { margin: 0; min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif; background: linear-gradient(-45deg, #6366f1, #a855f7, #ec4899); background-size: 400% 400%; animation: gradientBG 10s ease infinite; display: flex; align-items: center; justify-content: center; overscroll-behavior: none; }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        .app-shell { width: 100%; max-width: 430px; height: 92vh; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(15px); border-radius: 35px; overflow-y: auto; position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.4); }
-        .school-banner { padding: 25px; text-align: center; background: white; border-radius: 0 0 35px 35px; }
-        .school-logo { width: 80px; height: 80px; border-radius: 20px; object-fit: cover; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .camera-container { margin: 20px; border-radius: 30px; overflow: hidden; height: 260px; border: 6px solid white; box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        
+        .app-shell { width: 100%; max-width: 430px; height: 92vh; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border-radius: 35px; overflow-y: auto; position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .school-banner { padding: 20px; text-align: center; background: white; border-radius: 0 0 30px 30px; border-bottom: 2px solid #f0f0f0; }
+        .school-logo { width: 60px; height: 60px; border-radius: 15px; object-fit: cover; margin-bottom: 5px; }
+        
+        .camera-container { margin: 15px; border-radius: 25px; overflow: hidden; height: 220px; border: 4px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         #video { width: 100%; height: 100%; object-fit: cover; }
-        .btn-action { border-radius: 20px; padding: 18px; font-weight: 800; border: none; color: white; margin-bottom: 15px; transition: 0.3s; width: 100%; }
+        
+        .btn-action { border-radius: 20px; padding: 18px; font-weight: 800; border: none; color: white; margin-bottom: 15px; width: 100%; transition: 0.3s; }
         .btn-masuk { background: linear-gradient(135deg, #10b981, #059669); }
         .btn-pulang { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        .history-card { background: white; border-radius: 18px; padding: 15px; margin-bottom: 12px; border-left: 8px solid #eee; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        .status-telat { border-left-color: var(--danger); }
-        .status-tepat { border-left-color: var(--success); }
-        #login-screen, #setup-account-screen, #main-app, #admin-panel, #profile-page { display: none; }
+        
+        /* Style untuk tombol yang sudah diklik/nonaktif */
+        .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed; transform: scale(0.98); opacity: 0.8; }
+        
+        #login-screen, #register-screen, #main-app, #admin-panel, #profile-page { display: none; padding: 20px; }
+        
+        .live-card { background: white; border-radius: 15px; padding: 12px; margin-bottom: 10px; border-left: 5px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
@@ -38,47 +39,56 @@
 <div class="app-shell">
     <div class="school-banner">
         <img id="logo-img" src="" class="school-logo">
-        <h5 id="school-name" class="fw-bold m-0" style="color: var(--primary);">MEMUAT...</h5>
+        <h6 id="school-name" class="fw-bold m-0" style="color: var(--primary);">MEMUAT...</h6>
     </div>
 
-    <div id="login-screen" class="p-4 text-center">
-        <div class="mt-5 mb-4"><i class="fas fa-fingerprint text-primary" style="font-size: 4rem;"></i></div>
-        <h3 class="fw-bold mb-4">E-Presensi</h3>
-        <input type="text" id="username" class="form-control mb-3 p-3 rounded-pill border-0 shadow-sm" placeholder="Username">
-        <input type="password" id="password" class="form-control mb-4 p-3 rounded-pill border-0 shadow-sm" placeholder="Password">
-        <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow" onclick="handleLogin()">MASUK</button>
+    <div id="login-screen" class="text-center">
+        <div class="mt-5 mb-4 text-primary"><i class="fas fa-fingerprint" style="font-size: 4rem;"></i></div>
+        <h4 class="fw-bold mb-4">E-Presensi</h4>
+        <input type="text" id="login-user" class="form-control mb-3 p-3 rounded-pill border-0 shadow-sm" placeholder="Username">
+        <input type="password" id="login-pass" class="form-control mb-4 p-3 rounded-pill border-0 shadow-sm" placeholder="Password">
+        <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold mb-3" onclick="handleLogin()">MASUK</button>
+        <p class="small">Guru baru? <a href="javascript:void(0)" onclick="showScreen('register-screen')">Daftar Akun</a></p>
+    </div>
+
+    <div id="register-screen">
+        <h4 class="fw-bold mb-4 text-center">Daftar Akun Guru</h4>
+        <input type="text" id="reg-nama" class="form-control mb-3 p-3 rounded-4" placeholder="Nama Lengkap">
+        <input type="text" id="reg-user" class="form-control mb-3 p-3 rounded-4" placeholder="Username Baru">
+        <input type="password" id="reg-pass" class="form-control mb-4 p-3 rounded-4" placeholder="Password Baru">
+        <button class="btn btn-dark w-100 py-3 rounded-pill fw-bold mb-3" onclick="handleRegister()">BUAT AKUN</button>
+        <button class="btn btn-link w-100 small text-muted" onclick="showScreen('login-screen')">Batal / Kembali</button>
     </div>
 
     <div id="main-app">
-        <div class="p-4 d-flex justify-content-between align-items-center">
-            <div><small class="text-muted">Guru:</small><h5 class="fw-bold m-0" id="user-display">-</h5></div>
-            <img id="mini-avatar" src="" style="width:60px; height:60px; border-radius:50%; border:3px solid white; object-fit:cover; cursor:pointer" onclick="showProfile()">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div><small class="text-muted">Guru:</small><h6 class="fw-bold m-0" id="user-display">-</h6></div>
+            <img id="mini-avatar" src="" style="width:50px; height:50px; border-radius:50%; border:2px solid white; object-fit:cover; cursor:pointer" onclick="showProfile()">
         </div>
         <div class="camera-container"><video id="video" autoplay playsinline></video></div>
-        <div class="px-4 text-center">
-            <h1 id="clock" class="fw-bold mb-0" style="font-size: 3rem;">00:00</h1>
-            <p id="date" class="text-muted mb-4"></p>
-            <button class="btn-action btn-masuk shadow-lg" onclick="takeAbsen('Masuk')">ABSEN MASUK</button>
-            <button class="btn-action btn-pulang shadow-lg" onclick="takeAbsen('Pulang')">ABSEN PULANG</button>
+        <div class="text-center">
+            <h2 id="clock" class="fw-bold mb-0">00:00</h2>
+            <p id="date" class="text-muted small mb-3"></p>
+            
+            <button id="btn-masuk" class="btn-action btn-masuk shadow-lg" onclick="takeAbsen('Masuk')">ABSEN MASUK</button>
+            <button id="btn-pulang" class="btn-action btn-pulang shadow-lg" onclick="takeAbsen('Pulang')">ABSEN PULANG</button>
+            <p id="absen-status-msg" class="small text-success fw-bold"></p>
         </div>
     </div>
 
-    <div id="profile-page" class="p-4">
-        <button class="btn btn-light rounded-circle mb-3 shadow-sm" onclick="showScreen('main-app')"><i class="fas fa-arrow-left"></i></button>
-        <div class="text-center mb-4">
-            <img id="profile-avatar" src="" style="width:110px; height:110px; border-radius:50%; border:4px solid white; object-fit:cover;">
-            <h4 id="profile-name" class="fw-bold mt-3 mb-0">-</h4>
-            <div id="profile-jabatan" class="text-muted small">Guru</div>
+    <div id="admin-panel">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold m-0">Live Absensi</h5>
+            <button class="btn btn-sm btn-success rounded-pill" onclick="exportData()">Excel</button>
         </div>
-        <h6 class="fw-bold mb-3">Aktivitas Terbaru</h6>
+        <div id="live-list" style="max-height: 400px; overflow-y: auto;">
+            </div>
+        <button class="btn btn-link w-100 mt-3 text-danger" onclick="location.reload()">Keluar Admin</button>
+    </div>
+
+    <div id="profile-page">
+        <button class="btn btn-light rounded-pill btn-sm mb-3" onclick="showScreen('main-app')"><i class="fas fa-arrow-left"></i> Kembali</button>
         <div id="history-list"></div>
-        <button class="btn btn-link text-danger w-100 mt-4" onclick="location.reload()">Logout Akun</button>
-    </div>
-
-    <div id="admin-panel" class="p-4">
-        <div class="bg-primary text-white p-4 rounded-4 mb-4"><h5>Admin Panel</h5></div>
-        <button class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow" onclick="exportData()">DOWNLOAD REKAP EXCEL</button>
-        <button class="btn btn-link w-100 mt-3" onclick="location.reload()">Kembali</button>
     </div>
 </div>
 
@@ -89,15 +99,17 @@ const SUPABASE_URL = 'https://dddbjqnoovjbdesvaulo.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkZGJqcW5vb3ZqYmRlc3ZhdWxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNDAzMTUsImV4cCI6MjA5MDYxNjMxNX0.yLeBX4C8bwpCngvOViMR-eocHVFjv0BXXBuPJWwb9KU';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// KONFIGURASI TITIK SEKOLAH
 const SCHOOL_LAT = -6.250736361618612;
 const SCHOOL_LON = 106.46656879999998;
-const MAX_DISTANCE = 50; // dalam meter
+const MAX_DISTANCE = 50; 
 
 let currentUser = "";
-let schoolLogoBase64 = "";
 
-window.onload = () => { updateClock(); setInterval(updateClock, 1000); loadSchoolData(); showScreen('login-screen'); };
+window.onload = () => { 
+    updateClock(); setInterval(updateClock, 1000); 
+    loadSchoolData(); 
+    showScreen('login-screen'); 
+};
 
 function updateClock() {
     const now = new Date();
@@ -105,15 +117,144 @@ function updateClock() {
     document.getElementById('date').innerText = now.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'});
 }
 
-function hitungJarak(lat1, lon1, lat2, lon2) {
-    const R = 6371e3; // Radius bumi dalam meter
-    const φ1 = lat1 * Math.PI/180;
-    const φ2 = lat2 * Math.PI/180;
-    const Δφ = (lat2-lat1) * Math.PI/180;
-    const Δλ = (lon2-lon1) * Math.PI/180;
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
+function showScreen(id) {
+    ['login-screen', 'register-screen', 'main-app', 'admin-panel', 'profile-page'].forEach(s => {
+        document.getElementById(s).style.display = (s === id) ? 'block' : 'none';
+    });
+}
+
+// 1. FUNGSI REGISTRASI GURU BARU
+async function handleRegister() {
+    const nama = document.getElementById('reg-nama').value;
+    const user = document.getElementById('reg-user').value;
+    const pass = document.getElementById('reg-pass').value;
+
+    if(!nama || !user || !pass) return alert("Lengkapi semua bidang!");
+
+    const { error } = await _supabase.from('profil_guru').insert([{
+        username: user, password: pass, nama_lengkap: nama
+    }]);
+
+    if(!error) {
+        alert("Pendaftaran Berhasil! Silahkan Login.");
+        showScreen('login-screen');
+    } else {
+        alert("Gagal daftar: Username mungkin sudah ada.");
+    }
+}
+
+// 2. FUNGSI LOGIN & CEK STATUS TOMBOL
+async function handleLogin() {
+    const u = document.getElementById('login-user').value;
+    const p = document.getElementById('login-pass').value;
+
+    if(u === "admin" && p === "admin123") {
+        showScreen('admin-panel');
+        loadLiveAdmin();
+        return;
+    }
+
+    const { data, error } = await _supabase.from('profil_guru').select('*').eq('username', u).eq('password', p).single();
+    
+    if(data) {
+        currentUser = u;
+        document.getElementById('user-display').innerText = data.nama_lengkap;
+        document.getElementById('mini-avatar').src = `https://ui-avatars.com/api/?name=${data.nama_lengkap}&background=6366f1&color=fff`;
+        showScreen('main-app');
+        startCamera();
+        checkTodayPresence(); // Langsung cek apakah sudah absen hari ini
+    } else {
+        alert("Username atau Password Salah!");
+    }
+}
+
+// 3. FUNGSI LOCK TOMBOL (MAX 1X KLIK PER HARI)
+async function checkTodayPresence() {
+    const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+    
+    const { data } = await _supabase.from('presensi')
+        .select('tipe')
+        .eq('nama_guru', currentUser)
+        .gte('created_at', today);
+
+    const hasMasuk = data.some(d => d.tipe === 'Masuk');
+    const hasPulang = data.some(d => d.tipe === 'Pulang');
+
+    if(hasMasuk) {
+        const btnM = document.getElementById('btn-masuk');
+        btnM.classList.add('btn-disabled');
+        btnM.onclick = null;
+        btnM.innerText = "SUDAH ABSEN MASUK";
+    }
+    if(hasPulang) {
+        const btnP = document.getElementById('btn-pulang');
+        btnP.classList.add('btn-disabled');
+        btnP.onclick = null;
+        btnP.innerText = "SUDAH ABSEN PULANG";
+    }
+}
+
+// 4. MONITOR REALTIME ADMIN
+async function loadLiveAdmin() {
+    const today = new Date().toISOString().split('T')[0];
+    const { data } = await _supabase.from('presensi')
+        .select('*')
+        .gte('created_at', today)
+        .order('created_at', {ascending: false});
+
+    const container = document.getElementById('live-list');
+    if(!data || data.length === 0) {
+        container.innerHTML = "<p class='text-center small text-muted'>Belum ada absen masuk hari ini.</p>";
+    } else {
+        container.innerHTML = data.map(h => `
+            <div class="live-card">
+                <div class="d-flex justify-content-between">
+                    <b>${h.nama_guru}</b>
+                    <span class="badge ${h.tipe === 'Masuk' ? 'bg-success' : 'bg-danger'}">${h.tipe}</span>
+                </div>
+                <small class="text-muted">${new Date(h.created_at).toLocaleTimeString()} - ${h.keterangan}</small>
+            </div>
+        `).join('');
+    }
+}
+
+// LOGIKA ABSEN (DENGAN JARAK)
+async function takeAbsen(tipe) {
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+        const userLat = pos.coords.latitude;
+        const userLon = pos.coords.longitude;
+        
+        // Hitung Jarak
+        const R = 6371e3;
+        const dLat = (SCHOOL_LAT - userLat) * Math.PI/180;
+        const dLon = (SCHOOL_LON - userLon) * Math.PI/180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(userLat*Math.PI/180) * Math.cos(SCHOOL_LAT*Math.PI/180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        const jarak = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        if (jarak > MAX_DISTANCE) {
+            alert(`JARAK TERLALU JAUH!\nAnda berada ${Math.round(jarak)}m dari sekolah.\nBatas: ${MAX_DISTANCE}m.`);
+            return;
+        }
+
+        const canvas = document.getElementById('canvas');
+        canvas.width = 400; canvas.height = 400;
+        canvas.getContext('2d').drawImage(document.getElementById('video'), 0, 0, 400, 400);
+        
+        const jam = new Date().getHours();
+        const menit = new Date().getMinutes();
+        const status = (tipe === 'Masuk' && (jam > 7 || (jam === 7 && menit > 0))) ? "Terlambat" : "Tepat Waktu";
+
+        const { error } = await _supabase.from('presensi').insert([{
+            nama_guru: currentUser, tipe: tipe, keterangan: status,
+            foto: canvas.toDataURL('image/webp', 0.5),
+            latitude: userLat, longitude: userLon
+        }]);
+
+        if(!error) {
+            alert("Absen Berhasil Dicatat!");
+            checkTodayPresence(); // Kunci tombol setelah berhasil
+        }
+    }, (err) => alert("Harap aktifkan GPS!"));
 }
 
 async function loadSchoolData() {
@@ -124,91 +265,28 @@ async function loadSchoolData() {
     }
 }
 
-function showScreen(id) {
-    ['login-screen', 'main-app', 'admin-panel', 'profile-page'].forEach(s => {
-        document.getElementById(s).style.display = (s === id) ? 'block' : 'none';
-    });
-}
-
-async function handleLogin() {
-    const u = document.getElementById('username').value;
-    const p = document.getElementById('password').value;
-    if(u === "admin" && p === "admin123") return showScreen('admin-panel');
-    const { data } = await _supabase.from('profil_guru').select('*').eq('username', u).eq('password', p).single();
-    if(data) {
-        currentUser = u;
-        document.getElementById('user-display').innerText = data.nama_lengkap;
-        document.getElementById('mini-avatar').src = data.foto_avatar || `https://ui-avatars.com/api/?name=${data.nama_lengkap}`;
-        showScreen('main-app'); startCamera();
-    } else alert("Login Gagal!");
-}
-
 function startCamera() {
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }).then(s => document.getElementById('video').srcObject = s);
 }
 
-async function takeAbsen(tipe) {
-    const now = new Date();
-    const jam = now.getHours();
-    const menit = now.getMinutes();
-    let statusWaktu = (tipe === 'Masuk' && (jam > 7 || (jam === 7 && menit > 0))) ? "Terlambat" : "Tepat Waktu";
-
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-        const userLat = pos.coords.latitude;
-        const userLon = pos.coords.longitude;
-        const jarak = hitungJarak(userLat, userLon, SCHOOL_LAT, SCHOOL_LON);
-
-        if (jarak > MAX_DISTANCE) {
-            alert(`ABSEN DITOLAK!\nJarak Anda: ${Math.round(jarak)}m dari sekolah.\nBatas maksimal: ${MAX_DISTANCE}m.`);
-            return;
-        }
-
-        const canvas = document.getElementById('canvas');
-        canvas.width = 400; canvas.height = 400;
-        canvas.getContext('2d').drawImage(document.getElementById('video'), 0, 0, 400, 400);
-        
-        await _supabase.from('presensi').insert([{
-            nama_guru: currentUser, tipe: tipe, keterangan: statusWaktu,
-            foto: canvas.toDataURL('image/webp', 0.5),
-            latitude: userLat, longitude: userLon
-        }]);
-        alert(`Berhasil! Status: ${statusWaktu}\nJarak ke sekolah: ${Math.round(jarak)}m`);
-    }, (err) => {
-        alert("GPS tidak aktif atau izin ditolak!");
-    }, { enableHighAccuracy: true });
-}
-
 async function exportData() {
     const { data } = await _supabase.from('presensi').select('*').order('created_at', {ascending: false});
-    const report = data.map(i => {
-        const dt = new Date(i.created_at);
-        return {
-            'Nama Guru': i.nama_guru,
-            'Tanggal': dt.toLocaleDateString('id-ID'),
-            'Jam': dt.toLocaleTimeString('id-ID'),
-            'Tipe': i.tipe,
-            'Status': i.keterangan,
-            'Jarak (Lat,Lon)': `${i.latitude},${i.longitude}`
-        };
-    });
-    const ws = XLSX.utils.json_to_sheet(report);
+    const ws = XLSX.utils.json_to_sheet(data.map(i => ({
+        'Nama': i.nama_guru, 'Tanggal': new Date(i.created_at).toLocaleDateString(), 
+        'Jam': new Date(i.created_at).toLocaleTimeString(), 'Tipe': i.tipe, 'Status': i.keterangan
+    })));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Rekap");
-    XLSX.writeFile(wb, "Rekap_Absensi_v2.4.xlsx");
+    XLSX.writeFile(wb, "Rekap_Presensi_v2.5.xlsx");
 }
 
 async function showProfile() {
     showScreen('profile-page');
-    const { data: user } = await _supabase.from('profil_guru').select('*').eq('username', currentUser).single();
-    document.getElementById('profile-name').innerText = user.nama_lengkap;
-    document.getElementById('profile-avatar').src = user.foto_avatar || `https://ui-avatars.com/api/?name=${user.nama_lengkap}`;
     const { data: hist } = await _supabase.from('presensi').select('*').eq('nama_guru', currentUser).order('created_at', {ascending:false}).limit(10);
     document.getElementById('history-list').innerHTML = hist.map(h => `
-        <div class="history-card ${h.keterangan === 'Terlambat' ? 'status-telat' : 'status-tepat'} shadow-sm">
-            <div class="d-flex justify-content-between">
-                <div><b>${h.tipe}</b><br><small class="text-muted">${new Date(h.created_at).toLocaleString('id-ID')}</small></div>
-                <span class="badge ${h.keterangan === 'Terlambat' ? 'bg-danger' : 'bg-success'} rounded-pill align-self-center">${h.keterangan}</span>
-            </div>
+        <div class="history-card shadow-sm p-3 mb-2 bg-white rounded-4" style="border-left: 5px solid ${h.keterangan === 'Terlambat' ? 'red' : 'green'}">
+            <b>${h.tipe}</b> - <small>${h.keterangan}</small><br>
+            <span class="text-muted small">${new Date(h.created_at).toLocaleString()}</span>
         </div>
     `).join('');
 }
