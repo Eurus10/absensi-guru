@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>E-Presensi Guru v3.5 - Jam 17:00</title>
+    <title>E-Presensi Guru v3.6 - Time Window</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6366f1">
@@ -15,7 +15,7 @@
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        :root { --primary: #6366f1; --success: #22c55e; --danger: #ef4444; --warning: #f59e0b; }
+        :root { --primary: #6366f1; --success: #22c55e; --danger: #ef4444; }
         
         body { 
             margin: 0; min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif; 
@@ -34,18 +34,20 @@
         .camera-box { margin: 0 20px 15px; border-radius: 25px; overflow: hidden; height: 180px; background: #000; border: 3px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         #video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 
-        .cool-btn { border: none; border-radius: 20px; padding: 15px; color: white; font-weight: 800; display: flex; flex-direction: column; align-items: center; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .cool-btn { border: none; border-radius: 20px; padding: 15px; color: white; font-weight: 800; display: flex; flex-direction: column; align-items: center; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-decoration: none; }
         .btn-masuk { background: linear-gradient(135deg, #10b981, #059669); }
         .btn-izin { background: linear-gradient(135deg, #f59e0b, #d97706); }
         .btn-pulang { background: linear-gradient(135deg, #ef4444, #dc2626); width: 100%; margin-top: 10px; flex-direction: row; justify-content: center; gap: 10px; }
         .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; opacity: 0.6; box-shadow: none; cursor: not-allowed; }
 
-        .user-card { background: white; border-radius: 18px; padding: 12px; margin-bottom: 10px; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; }
-        .admin-thumb { width: 38px; height: 38px; border-radius: 10px; object-fit: cover; cursor: pointer; border: 2px solid #fff; box-shadow: 0 3px 6px rgba(0,0,0,0.1); transition: 0.2s; }
+        .user-card { background: white; border-radius: 18px; padding: 10px; margin-bottom: 10px; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; }
+        .admin-thumb { width: 38px; height: 38px; border-radius: 10px; object-fit: cover; cursor: pointer; border: 2px solid #fff; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
         
-        #photo-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 25px; backdrop-filter: blur(5px); }
+        #photo-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 25px; }
         .modal-content-img { background: white; padding: 15px; border-radius: 25px; width: 100%; max-width: 320px; text-align: center; }
-        .modal-content-img img { width: 100%; border-radius: 15px; margin-bottom: 15px; }
+        
+        .pass-container { position: relative; }
+        .toggle-pass { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #64748b; }
 
         #login-screen, #register-screen, #main-app, #admin-panel, #profile-page { display: none; padding: 20px; }
     </style>
@@ -54,41 +56,41 @@
 
 <div id="photo-modal" onclick="this.style.display='none'">
     <div class="modal-content-img" onclick="event.stopPropagation()">
-        <h6 id="modal-title" class="fw-bold text-primary mb-2" style="font-size: 0.8rem;">PREVIEW FOTO</h6>
-        <img id="modal-img" src="">
-        <button class="btn btn-dark w-100 rounded-pill fw-bold btn-sm py-2" onclick="document.getElementById('photo-modal').style.display='none'">TUTUP</button>
+        <h6 id="modal-title" class="fw-bold text-primary mb-2 small">PREVIEW FOTO</h6>
+        <img id="modal-img" src="" class="w-100 rounded-3 mb-3">
+        <button class="btn btn-dark w-100 rounded-pill fw-bold btn-sm" onclick="document.getElementById('photo-modal').style.display='none'">TUTUP</button>
     </div>
 </div>
 
 <div class="app-shell">
     <div class="school-banner shadow-sm">
         <img id="logo-img" src="ChatGPTImageApr1202609_31_16PM.jpeg" style="width:45px; height:45px; border-radius:12px; object-fit:cover;">
-        <h6 id="school-name" class="fw-bold m-0 mt-2 text-primary" style="font-size: 0.75rem; letter-spacing: 1px;">MEMUAT...</h6>
+        <h6 id="school-name" class="fw-bold m-0 mt-2 text-primary small">MEMUAT...</h6>
     </div>
 
     <div id="main-app" class="px-3">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <div><small class="text-muted">Selamat Tugas,</small><h6 class="fw-bold m-0" id="user-display">-</h6></div>
-            <img id="mini-avatar" src="" style="width:48px; height:48px; border-radius:15px; object-fit:cover; border:2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" onclick="showProfile()">
+            <div><small class="text-muted">Halo,</small><h6 class="fw-bold m-0" id="user-display">-</h6></div>
+            <img id="mini-avatar" src="" style="width:48px; height:48px; border-radius:15px; object-fit:cover; border:2px solid white;" onclick="showProfile()">
         </div>
         <div class="text-center mb-3">
-            <h1 id="clock" class="fw-bold m-0" style="font-size: 3rem; color: #1e293b; letter-spacing: -2px;">00:00</h1>
-            <p id="date" class="text-muted fw-bold small text-uppercase"></p>
+            <h1 id="clock" class="fw-bold m-0" style="font-size: 2.8rem; color: #1e293b;">00:00</h1>
+            <p id="date" class="text-muted fw-bold small"></p>
         </div>
         <div class="camera-box"><video id="video" autoplay playsinline></video></div>
         <div class="row gx-2">
-            <div class="col-6"><button id="btn-masuk" class="cool-btn btn-masuk w-100" onclick="takeAbsen('Masuk')"><i class="fas fa-camera-retro mb-1"></i> MASUK</button></div>
-            <div class="col-6"><button id="btn-izin" class="cool-btn btn-izin w-100" onclick="takeIzin()"><i class="fas fa-calendar-minus mb-1"></i> IZIN/SAKIT</button></div>
+            <div class="col-6"><button id="btn-masuk" class="cool-btn btn-masuk w-100" onclick="takeAbsen('Masuk')"><i class="fas fa-camera mb-1"></i> MASUK</button></div>
+            <div class="col-6"><button id="btn-izin" class="cool-btn btn-izin w-100" onclick="takeIzin()"><i class="fas fa-envelope mb-1"></i> IZIN</button></div>
         </div>
-        <button id="btn-pulang" class="cool-btn btn-pulang" onclick="takeAbsen('Pulang')"><i class="fas fa-home"></i> ABSEN PULANG (17:00)</button>
-        <p id="lock-msg" class="text-center text-danger small fw-bold mt-2 d-none">🔒 Tombol Pulang Terkunci s/d 17:00</p>
+        <button id="btn-pulang" class="cool-btn btn-pulang" onclick="takeAbsen('Pulang')"><i class="fas fa-home"></i> ABSEN PULANG</button>
+        <p id="lock-msg" class="text-center text-muted small mt-2 d-none">Absen pulang dibuka 14:00 - 17:00</p>
     </div>
 
     <div id="admin-panel" class="px-3">
-        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-            <h6 class="fw-bold m-0"><i class="fas fa-shield-alt text-primary"></i> ADMIN PANEL</h6>
+        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+            <h6 class="fw-bold m-0">ADMIN MONITORING</h6>
             <div class="d-flex gap-2">
-                <button class="btn btn-success btn-sm rounded-pill" onclick="exportData()"><i class="fas fa-download"></i></button>
+                <button class="btn btn-success btn-sm rounded-pill" onclick="exportData()"><i class="fas fa-file-excel"></i></button>
                 <button class="btn btn-danger btn-sm rounded-pill" onclick="logout()"><i class="fas fa-power-off"></i></button>
             </div>
         </div>
@@ -106,24 +108,32 @@
             <input type="text" id="edit-nama" class="form-control border-0 bg-light mb-2 p-2 rounded-3 small fw-bold">
             <label class="text-muted small fw-bold">JABATAN</label>
             <input type="text" id="edit-jabatan" class="form-control border-0 bg-light mb-3 p-2 rounded-3 small">
-            <button class="btn btn-primary w-100 rounded-pill fw-bold" onclick="updateProfile()">UPDATE PROFIL</button>
+            <button class="btn btn-primary w-100 rounded-pill fw-bold mb-2" onclick="updateProfile()">UPDATE PROFIL</button>
+            <button class="btn btn-outline-danger w-100 rounded-pill fw-bold" onclick="logout()">LOGOUT AKUN</button>
         </div>
         <button class="btn btn-light w-100 rounded-pill fw-bold border" onclick="showScreen('main-app')">KEMBALI</button>
     </div>
 
-    <div id="login-screen" class="px-4 py-5 text-center">
-        <h4 class="fw-bold mb-4">Login Guru</h4>
+    <div id="login-screen" class="px-4 py-5">
+        <div class="text-center mb-4"><i class="fas fa-lock text-primary" style="font-size: 3rem;"></i></div>
+        <h4 class="fw-bold text-center mb-4">Login</h4>
         <input type="text" id="login-user" class="form-control mb-3 p-3 rounded-pill border-0 bg-light" placeholder="Username">
-        <input type="password" id="login-pass" class="form-control mb-4 p-3 rounded-pill border-0 bg-light" placeholder="Password">
-        <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow" onclick="handleLogin()">MASUK</button>
-        <p class="mt-4 small">Belum punya akun? <a href="#" onclick="showScreen('register-screen')" class="fw-bold text-decoration-none">Daftar</a></p>
+        <div class="pass-container mb-4">
+            <input type="password" id="login-pass" class="form-control p-3 rounded-pill border-0 bg-light" placeholder="Password">
+            <i class="fas fa-eye toggle-pass" onclick="togglePass('login-pass', this)"></i>
+        </div>
+        <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold" onclick="handleLogin()">MASUK</button>
+        <p class="mt-4 text-center small">Belum punya akun? <a href="#" onclick="showScreen('register-screen')" class="fw-bold text-decoration-none">Daftar</a></p>
     </div>
 
     <div id="register-screen" class="px-4 py-5">
-        <h4 class="fw-bold text-center mb-4">Daftar Baru</h4>
+        <h4 class="fw-bold text-center mb-4">Registrasi</h4>
         <input type="text" id="reg-nama" class="form-control mb-3 p-3 rounded-4 bg-light border-0" placeholder="Nama Lengkap">
         <input type="text" id="reg-user" class="form-control mb-3 p-3 rounded-4 bg-light border-0" placeholder="Username">
-        <input type="password" id="reg-pass" class="form-control mb-4 p-3 rounded-4 bg-light border-0" placeholder="Password">
+        <div class="pass-container mb-4">
+            <input type="password" id="reg-pass" class="form-control p-3 rounded-4 bg-light border-0" placeholder="Password">
+            <i class="fas fa-eye toggle-pass" onclick="togglePass('reg-pass', this)"></i>
+        </div>
         <button class="btn btn-dark w-100 py-3 rounded-pill fw-bold" onclick="handleRegister()">DAFTAR</button>
     </div>
 </div>
@@ -139,6 +149,12 @@ const SCHOOL_LAT = -6.250736361618612, SCHOOL_LON = 106.46656879999998, MAX_DIST
 let currentUser = "", userData = null;
 
 window.onload = () => { updateClock(); setInterval(updateClock, 1000); loadSchoolData(); checkAutoLogin(); };
+
+function togglePass(id, el) {
+    const input = document.getElementById(id);
+    if(input.type === 'password') { input.type = 'text'; el.classList.replace('fa-eye', 'fa-eye-slash'); }
+    else { input.type = 'password'; el.classList.replace('fa-eye-slash', 'fa-eye'); }
+}
 
 async function checkAutoLogin() {
     const u = localStorage.getItem('guru_user'), p = localStorage.getItem('guru_pass');
@@ -178,12 +194,13 @@ async function updateProfile() {
 
 async function takeAbsen(tipe) {
     const now = new Date();
-    // LOGIKA JAM PULANG 17:00
-    if(tipe === 'Pulang' && now.getHours() < 17) return alert("Belum waktunya pulang! (Jam 17:00)");
+    const h = now.getHours();
+    
+    // LOGIKA WINDOW PULANG 14:00 - 17:00
+    if(tipe === 'Pulang' && (h < 14 || h >= 17)) return alert("Absen pulang hanya bisa jam 14:00 s/d 17:00!");
     
     navigator.geolocation.getCurrentPosition(async (pos) => {
         const uLat = pos.coords.latitude, uLon = pos.coords.longitude;
-        // Hitung Jarak
         const R = 6371e3;
         const dLat = (SCHOOL_LAT - uLat) * Math.PI/180;
         const dLon = (SCHOOL_LON - uLon) * Math.PI/180;
@@ -196,15 +213,15 @@ async function takeAbsen(tipe) {
         const ctx = cvs.getContext('2d'); ctx.translate(400, 0); ctx.scale(-1, 1);
         ctx.drawImage(document.getElementById('video'), 0, 0, 400, 400);
         const img = cvs.toDataURL('image/webp', 0.5);
-        const ket = (tipe === 'Masuk' && (now.getHours() > 7 || (now.getHours() === 7 && now.getMinutes() > 0))) ? "Terlambat" : "Tepat Waktu";
+        const ket = (tipe === 'Masuk' && (h > 7 || (h === 7 && now.getMinutes() > 0))) ? "Terlambat" : "Tepat Waktu";
         
         await _supabase.from('presensi').insert([{ nama_guru: currentUser, tipe, keterangan: ket, foto: img, latitude: uLat, longitude: uLon }]);
         alert("Presensi Berhasil!"); checkTodayPresence();
-    }, () => alert("Gagal mendapatkan lokasi. Pastikan GPS aktif!"), { enableHighAccuracy: true });
+    }, () => alert("Aktifkan GPS!"), { enableHighAccuracy: true });
 }
 
 async function takeIzin() {
-    const al = prompt("Masukkan alasan (Sakit/Izin):", "Sakit");
+    const al = prompt("Alasan (Sakit/Izin):", "Sakit");
     if(!al) return;
     await _supabase.from('presensi').insert([{ nama_guru: currentUser, tipe: 'Izin', keterangan: al }]);
     alert("Izin Terkirim!"); checkTodayPresence();
@@ -229,17 +246,7 @@ async function loadAdminDashboard() {
         const mTime = pM ? new Date(pM.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) : '--:--';
         const pTime = pP ? new Date(pP.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) : '--:--';
         const mColor = (pM && pM.keterangan === 'Terlambat') ? 'text-danger' : (pM ? 'text-success' : 'text-muted');
-        return `
-            <div class="user-card">
-                <img src="${g.foto_avatar || 'https://ui-avatars.com/api/?name='+g.nama_lengkap}" style="width:40px; height:40px; border-radius:12px; margin-right:10px;">
-                <div style="flex:1">
-                    <div class="fw-bold small">${g.nama_lengkap}</div>
-                    <div style="font-size:0.65rem">
-                        M: <b class="${mColor}">${mTime}</b> ${pM && pM.foto ? `<img src="${pM.foto}" class="admin-thumb ms-1" onclick="viewPhoto('${pM.foto}', 'M: ${g.nama_lengkap}')">` : ''} 
-                        | P: <b class="${pP ? 'text-success':'text-muted'}">${pTime}</b> ${pP ? `<img src="${pP.foto}" class="admin-thumb ms-1" onclick="viewPhoto('${pP.foto}', 'P: ${g.nama_lengkap}')">` : ''}
-                    </div>
-                </div>
-            </div>`;
+        return `<div class="user-card"><img src="${g.foto_avatar || 'https://ui-avatars.com/api/?name='+g.nama_lengkap}" style="width:40px; height:40px; border-radius:12px; margin-right:10px;"><div style="flex:1"><div class="fw-bold small">${g.nama_lengkap}</div><div style="font-size:0.65rem">M: <b class="${mColor}">${mTime}</b> ${pM && pM.foto ? `<img src="${pM.foto}" class="admin-thumb ms-1" onclick="viewPhoto('${pM.foto}', 'M: ${g.nama_lengkap}')">` : ''} | P: <b class="${pP ? 'text-success':'text-muted'}">${pTime}</b> ${pP ? `<img src="${pP.foto}" class="admin-thumb ms-1" onclick="viewPhoto('${pP.foto}', 'P: ${g.nama_lengkap}')">` : ''}</div></div></div>`;
     }).join('');
 }
 
@@ -248,28 +255,30 @@ function showScreen(id) { ['login-screen','register-screen','main-app','admin-pa
 
 function updateClock() { 
     const n = new Date(); 
+    const h = n.getHours();
     document.getElementById('clock').innerText = n.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}); 
     document.getElementById('date').innerText = n.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long'}); 
     
     const btnP = document.getElementById('btn-pulang');
     const msg = document.getElementById('lock-msg');
-    if (n.getHours() < 17) {
-        btnP.classList.add('btn-disabled');
-        msg.classList.remove('d-none');
-    } else {
+    
+    if (h >= 14 && h < 17) {
         btnP.classList.remove('btn-disabled');
         msg.classList.add('d-none');
+    } else {
+        btnP.classList.add('btn-disabled');
+        msg.classList.remove('d-none');
     }
 }
 
-function startCamera() { navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }).then(s => document.getElementById('video').srcObject = s); }
+function startCamera() { navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }).then(s => document.getElementById('video').srcObject = s).catch(e => console.log(e)); }
 function logout() { localStorage.clear(); location.reload(); }
 async function handleRegister() { 
     const n = document.getElementById('reg-nama').value, u = document.getElementById('reg-user').value, p = document.getElementById('reg-pass').value;
     await _supabase.from('profil_guru').insert([{ username:u, password:p, nama_lengkap:n }]); alert("Sukses!"); showScreen('login-screen'); 
 }
 async function loadSchoolData() { const { data } = await _supabase.from('pengaturan').select('*').eq('id', 1).single(); if(data) document.getElementById('school-name').innerText = data.nama_sekolah; }
-async function showProfile() { showScreen('profile-page'); document.getElementById('p-img').src = userData.foto_avatar || `https://ui-avatars.com/api/?name=${userData.nama_lengkap}`; document.getElementById('p-nama').innerText = userData.nama_lengkap; }
+async function showProfile() { showScreen('profile-page'); document.getElementById('p-img').src = userData.foto_avatar || `https://ui-avatars.com/api/?name=${userData.nama_lengkap}`; }
 async function uploadFotoProfil(input) { const f = input.files[0], r = new FileReader(); r.onload = async (e) => { const b64 = e.target.result; await _supabase.from('profil_guru').update({ foto_avatar: b64 }).eq('username', currentUser); location.reload(); }; r.readAsDataURL(f); }
 async function exportData() { const { data } = await _supabase.from('presensi').select('*'); const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Rekap"); XLSX.writeFile(wb, "Laporan_Presensi.xlsx"); }
 </script>
