@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>E-Presensi Guru v2.5</title>
+    <title>E-Presensi Guru v2.6</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -22,16 +22,18 @@
         .camera-container { margin: 15px; border-radius: 25px; overflow: hidden; height: 220px; border: 4px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         #video { width: 100%; height: 100%; object-fit: cover; }
         
-        .btn-action { border-radius: 20px; padding: 18px; font-weight: 800; border: none; color: white; margin-bottom: 15px; width: 100%; transition: 0.3s; }
+        .btn-action { border-radius: 20px; padding: 18px; font-weight: 800; border: none; color: white; margin-bottom: 12px; width: 100%; transition: 0.3s; }
         .btn-masuk { background: linear-gradient(135deg, #10b981, #059669); }
         .btn-pulang { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        
-        /* Style untuk tombol yang sudah diklik/nonaktif */
-        .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed; transform: scale(0.98); opacity: 0.8; }
+        .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed; opacity: 0.8; }
         
         #login-screen, #register-screen, #main-app, #admin-panel, #profile-page { display: none; padding: 20px; }
-        
         .live-card { background: white; border-radius: 15px; padding: 12px; margin-bottom: 10px; border-left: 5px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        .profile-header { text-align: center; margin-bottom: 20px; }
+        .profile-img-container { position: relative; display: inline-block; }
+        .profile-img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .btn-edit-photo { position: absolute; bottom: 0; right: 0; background: var(--primary); color: white; border-radius: 50%; width: 30px; height: 30px; border: none; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -47,7 +49,7 @@
         <h4 class="fw-bold mb-4">E-Presensi</h4>
         <input type="text" id="login-user" class="form-control mb-3 p-3 rounded-pill border-0 shadow-sm" placeholder="Username">
         <input type="password" id="login-pass" class="form-control mb-4 p-3 rounded-pill border-0 shadow-sm" placeholder="Password">
-        <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold mb-3" onclick="handleLogin()">MASUK</button>
+        <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold mb-3 shadow" onclick="handleLogin()">MASUK</button>
         <p class="small">Guru baru? <a href="javascript:void(0)" onclick="showScreen('register-screen')">Daftar Akun</a></p>
     </div>
 
@@ -57,7 +59,7 @@
         <input type="text" id="reg-user" class="form-control mb-3 p-3 rounded-4" placeholder="Username Baru">
         <input type="password" id="reg-pass" class="form-control mb-4 p-3 rounded-4" placeholder="Password Baru">
         <button class="btn btn-dark w-100 py-3 rounded-pill fw-bold mb-3" onclick="handleRegister()">BUAT AKUN</button>
-        <button class="btn btn-link w-100 small text-muted" onclick="showScreen('login-screen')">Batal / Kembali</button>
+        <button class="btn btn-link w-100 small text-muted" onclick="showScreen('login-screen')">Kembali</button>
     </div>
 
     <div id="main-app">
@@ -69,26 +71,33 @@
         <div class="text-center">
             <h2 id="clock" class="fw-bold mb-0">00:00</h2>
             <p id="date" class="text-muted small mb-3"></p>
-            
             <button id="btn-masuk" class="btn-action btn-masuk shadow-lg" onclick="takeAbsen('Masuk')">ABSEN MASUK</button>
             <button id="btn-pulang" class="btn-action btn-pulang shadow-lg" onclick="takeAbsen('Pulang')">ABSEN PULANG</button>
-            <p id="absen-status-msg" class="small text-success fw-bold"></p>
+            <p id="info-pulang" class="text-danger small fw-bold d-none">Absen pulang hanya bisa dilakukan mulai jam 14:00</p>
         </div>
     </div>
 
     <div id="admin-panel">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-bold m-0">Live Absensi</h5>
-            <button class="btn btn-sm btn-success rounded-pill" onclick="exportData()">Excel</button>
-        </div>
-        <div id="live-list" style="max-height: 400px; overflow-y: auto;">
-            </div>
-        <button class="btn btn-link w-100 mt-3 text-danger" onclick="location.reload()">Keluar Admin</button>
+        <h5 class="fw-bold mb-3">Live Monitor</h5>
+        <button class="btn btn-success w-100 rounded-pill mb-3 fw-bold" onclick="exportData()">REKAP EXCEL (TABEL RAPID)</button>
+        <div id="live-list"></div>
+        <button class="btn btn-link w-100 mt-3 text-danger" onclick="location.reload()">Logout Admin</button>
     </div>
 
     <div id="profile-page">
         <button class="btn btn-light rounded-pill btn-sm mb-3" onclick="showScreen('main-app')"><i class="fas fa-arrow-left"></i> Kembali</button>
+        <div class="profile-header">
+            <div class="profile-img-container">
+                <img id="p-img" src="" class="profile-img">
+                <button class="btn-edit-photo" onclick="document.getElementById('input-foto').click()"><i class="fas fa-camera"></i></button>
+                <input type="file" id="input-foto" style="display:none" accept="image/*" onchange="uploadFotoProfil(this)">
+            </div>
+            <h5 id="p-nama" class="fw-bold mt-2 mb-0">Nama Guru</h5>
+            <p id="p-username" class="text-muted small">@username</p>
+        </div>
+        <h6 class="fw-bold small mb-2">Riwayat 10 Absen Terakhir:</h6>
         <div id="history-list"></div>
+        <button class="btn btn-outline-danger btn-sm w-100 mt-3" onclick="location.reload()">Logout Akun</button>
     </div>
 </div>
 
@@ -104,6 +113,7 @@ const SCHOOL_LON = 106.46656879999998;
 const MAX_DISTANCE = 50; 
 
 let currentUser = "";
+let userData = null;
 
 window.onload = () => { 
     updateClock(); setInterval(updateClock, 1000); 
@@ -115,6 +125,15 @@ function updateClock() {
     const now = new Date();
     document.getElementById('clock').innerText = now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
     document.getElementById('date').innerText = now.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'});
+    
+    // Cek jam pulang untuk UI realtime
+    const hour = now.getHours();
+    const btnP = document.getElementById('btn-pulang');
+    if (hour < 14) {
+        document.getElementById('info-pulang').classList.remove('d-none');
+    } else {
+        document.getElementById('info-pulang').classList.add('d-none');
+    }
 }
 
 function showScreen(id) {
@@ -123,138 +142,150 @@ function showScreen(id) {
     });
 }
 
-// 1. FUNGSI REGISTRASI GURU BARU
 async function handleRegister() {
     const nama = document.getElementById('reg-nama').value;
     const user = document.getElementById('reg-user').value;
     const pass = document.getElementById('reg-pass').value;
-
-    if(!nama || !user || !pass) return alert("Lengkapi semua bidang!");
-
-    const { error } = await _supabase.from('profil_guru').insert([{
-        username: user, password: pass, nama_lengkap: nama
-    }]);
-
-    if(!error) {
-        alert("Pendaftaran Berhasil! Silahkan Login.");
-        showScreen('login-screen');
-    } else {
-        alert("Gagal daftar: Username mungkin sudah ada.");
-    }
+    if(!nama || !user || !pass) return alert("Lengkapi data!");
+    const { error } = await _supabase.from('profil_guru').insert([{ username: user, password: pass, nama_lengkap: nama }]);
+    if(!error) { alert("Berhasil! Silahkan Login."); showScreen('login-screen'); }
+    else alert("Username sudah ada!");
 }
 
-// 2. FUNGSI LOGIN & CEK STATUS TOMBOL
 async function handleLogin() {
     const u = document.getElementById('login-user').value;
     const p = document.getElementById('login-pass').value;
-
-    if(u === "admin" && p === "admin123") {
-        showScreen('admin-panel');
-        loadLiveAdmin();
-        return;
-    }
-
-    const { data, error } = await _supabase.from('profil_guru').select('*').eq('username', u).eq('password', p).single();
-    
+    if(u === "admin" && p === "admin123") { showScreen('admin-panel'); loadLiveAdmin(); return; }
+    const { data } = await _supabase.from('profil_guru').select('*').eq('username', u).eq('password', p).single();
     if(data) {
-        currentUser = u;
+        currentUser = u; userData = data;
         document.getElementById('user-display').innerText = data.nama_lengkap;
-        document.getElementById('mini-avatar').src = `https://ui-avatars.com/api/?name=${data.nama_lengkap}&background=6366f1&color=fff`;
-        showScreen('main-app');
-        startCamera();
-        checkTodayPresence(); // Langsung cek apakah sudah absen hari ini
-    } else {
-        alert("Username atau Password Salah!");
-    }
+        document.getElementById('mini-avatar').src = data.foto_avatar || `https://ui-avatars.com/api/?name=${data.nama_lengkap}&background=6366f1&color=fff`;
+        showScreen('main-app'); startCamera(); checkTodayPresence();
+    } else alert("Gagal Login!");
 }
 
-// 3. FUNGSI LOCK TOMBOL (MAX 1X KLIK PER HARI)
 async function checkTodayPresence() {
-    const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
-    
-    const { data } = await _supabase.from('presensi')
-        .select('tipe')
-        .eq('nama_guru', currentUser)
-        .gte('created_at', today);
-
+    const today = new Date().toISOString().split('T')[0];
+    const { data } = await _supabase.from('presensi').select('tipe').eq('nama_guru', currentUser).gte('created_at', today);
     const hasMasuk = data.some(d => d.tipe === 'Masuk');
     const hasPulang = data.some(d => d.tipe === 'Pulang');
 
     if(hasMasuk) {
-        const btnM = document.getElementById('btn-masuk');
-        btnM.classList.add('btn-disabled');
-        btnM.onclick = null;
-        btnM.innerText = "SUDAH ABSEN MASUK";
+        let bm = document.getElementById('btn-masuk');
+        bm.classList.add('btn-disabled'); bm.onclick = null; bm.innerText = "SUDAH ABSEN MASUK";
     }
     if(hasPulang) {
-        const btnP = document.getElementById('btn-pulang');
-        btnP.classList.add('btn-disabled');
-        btnP.onclick = null;
-        btnP.innerText = "SUDAH ABSEN PULANG";
+        let bp = document.getElementById('btn-pulang');
+        bp.classList.add('btn-disabled'); bp.onclick = null; bp.innerText = "SUDAH ABSEN PULANG";
     }
 }
 
-// 4. MONITOR REALTIME ADMIN
-async function loadLiveAdmin() {
-    const today = new Date().toISOString().split('T')[0];
-    const { data } = await _supabase.from('presensi')
-        .select('*')
-        .gte('created_at', today)
-        .order('created_at', {ascending: false});
-
-    const container = document.getElementById('live-list');
-    if(!data || data.length === 0) {
-        container.innerHTML = "<p class='text-center small text-muted'>Belum ada absen masuk hari ini.</p>";
-    } else {
-        container.innerHTML = data.map(h => `
-            <div class="live-card">
-                <div class="d-flex justify-content-between">
-                    <b>${h.nama_guru}</b>
-                    <span class="badge ${h.tipe === 'Masuk' ? 'bg-success' : 'bg-danger'}">${h.tipe}</span>
-                </div>
-                <small class="text-muted">${new Date(h.created_at).toLocaleTimeString()} - ${h.keterangan}</small>
-            </div>
-        `).join('');
-    }
-}
-
-// LOGIKA ABSEN (DENGAN JARAK)
 async function takeAbsen(tipe) {
+    const now = new Date();
+    // LOGIKA JAM PULANG 14:00
+    if(tipe === 'Pulang' && now.getHours() < 14) {
+        alert("Belum waktunya pulang! Absen pulang dibuka jam 14:00.");
+        return;
+    }
+
     navigator.geolocation.getCurrentPosition(async (pos) => {
         const userLat = pos.coords.latitude;
         const userLon = pos.coords.longitude;
-        
-        // Hitung Jarak
         const R = 6371e3;
         const dLat = (SCHOOL_LAT - userLat) * Math.PI/180;
         const dLon = (SCHOOL_LON - userLon) * Math.PI/180;
         const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(userLat*Math.PI/180) * Math.cos(SCHOOL_LAT*Math.PI/180) * Math.sin(dLon/2) * Math.sin(dLon/2);
         const jarak = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-        if (jarak > MAX_DISTANCE) {
-            alert(`JARAK TERLALU JAUH!\nAnda berada ${Math.round(jarak)}m dari sekolah.\nBatas: ${MAX_DISTANCE}m.`);
-            return;
-        }
+        if (jarak > MAX_DISTANCE) return alert(`Terlalu Jauh (${Math.round(jarak)}m)`);
 
         const canvas = document.getElementById('canvas');
         canvas.width = 400; canvas.height = 400;
         canvas.getContext('2d').drawImage(document.getElementById('video'), 0, 0, 400, 400);
         
-        const jam = new Date().getHours();
-        const menit = new Date().getMinutes();
-        const status = (tipe === 'Masuk' && (jam > 7 || (jam === 7 && menit > 0))) ? "Terlambat" : "Tepat Waktu";
+        const status = (tipe === 'Masuk' && (now.getHours() > 7 || (now.getHours() === 7 && now.getMinutes() > 0))) ? "Terlambat" : "Tepat Waktu";
 
-        const { error } = await _supabase.from('presensi').insert([{
+        await _supabase.from('presensi').insert([{
             nama_guru: currentUser, tipe: tipe, keterangan: status,
             foto: canvas.toDataURL('image/webp', 0.5),
             latitude: userLat, longitude: userLon
         }]);
 
+        alert("Absen Berhasil!");
+        checkTodayPresence();
+    }, (err) => alert("GPS Error"), { enableHighAccuracy: true });
+}
+
+// UPLOAD FOTO PROFIL
+async function uploadFotoProfil(input) {
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const base64 = e.target.result;
+        const { error } = await _supabase.from('profil_guru').update({ foto_avatar: base64 }).eq('username', currentUser);
         if(!error) {
-            alert("Absen Berhasil Dicatat!");
-            checkTodayPresence(); // Kunci tombol setelah berhasil
+            document.getElementById('p-img').src = base64;
+            document.getElementById('mini-avatar').src = base64;
+            alert("Foto Profil Diperbarui!");
         }
-    }, (err) => alert("Harap aktifkan GPS!"));
+    };
+    reader.readAsDataURL(file);
+}
+
+async function showProfile() {
+    showScreen('profile-page');
+    document.getElementById('p-nama').innerText = userData.nama_lengkap;
+    document.getElementById('p-username').innerText = "@" + userData.username;
+    document.getElementById('p-img').src = userData.foto_avatar || `https://ui-avatars.com/api/?name=${userData.nama_lengkap}`;
+    
+    const { data: hist } = await _supabase.from('presensi').select('*').eq('nama_guru', currentUser).order('created_at', {ascending:false}).limit(10);
+    document.getElementById('history-list').innerHTML = hist.map(h => `
+        <div class="history-card shadow-sm p-2 mb-2 bg-white rounded-3 small" style="border-left: 4px solid ${h.keterangan === 'Terlambat' ? 'red' : 'green'}">
+            <b>${h.tipe}</b> - ${h.keterangan} <br> <span class="text-muted" style="font-size:10px">${new Date(h.created_at).toLocaleString()}</span>
+        </div>
+    `).join('');
+}
+
+async function loadLiveAdmin() {
+    const today = new Date().toISOString().split('T')[0];
+    const { data } = await _supabase.from('presensi').select('*').gte('created_at', today).order('created_at', {ascending: false});
+    const container = document.getElementById('live-list');
+    container.innerHTML = data && data.length > 0 ? data.map(h => `
+        <div class="live-card">
+            <b>${h.nama_guru}</b> <span class="badge ${h.tipe === 'Masuk' ? 'bg-success' : 'bg-danger'} float-end">${h.tipe}</span><br>
+            <small class="text-muted">${new Date(h.created_at).toLocaleTimeString()} - ${h.keterangan}</small>
+        </div>
+    `).join('') : "<p class='small text-center'>Belum ada absen hari ini</p>";
+}
+
+// EXCEL REKAP HORIZONTAL (Satu Baris Per Guru Per Tanggal)
+async function exportData() {
+    const { data } = await _supabase.from('presensi').select('*').order('created_at', {ascending: true});
+    
+    const grouped = {};
+    data.forEach(item => {
+        const tgl = new Date(item.created_at).toLocaleDateString('id-ID');
+        const key = `${item.nama_guru}_${tgl}`;
+        
+        if(!grouped[key]) {
+            grouped[key] = { 'Nama Guru': item.nama_guru, 'Tanggal': tgl, 'Jam Masuk': '-', 'Status Masuk': '-', 'Jam Pulang': '-', 'Status Pulang': '-' };
+        }
+        
+        if(item.tipe === 'Masuk') {
+            grouped[key]['Jam Masuk'] = new Date(item.created_at).toLocaleTimeString('id-ID');
+            grouped[key]['Status Masuk'] = item.keterangan;
+        } else {
+            grouped[key]['Jam Pulang'] = new Date(item.created_at).toLocaleTimeString('id-ID');
+            grouped[key]['Status Pulang'] = item.keterangan;
+        }
+    });
+
+    const finalData = Object.values(grouped);
+    const ws = XLSX.utils.json_to_sheet(finalData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Rekap_Presensi");
+    XLSX.writeFile(wb, `Rekap_Presensi_Horizontal.xlsx`);
 }
 
 async function loadSchoolData() {
@@ -267,28 +298,6 @@ async function loadSchoolData() {
 
 function startCamera() {
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }).then(s => document.getElementById('video').srcObject = s);
-}
-
-async function exportData() {
-    const { data } = await _supabase.from('presensi').select('*').order('created_at', {ascending: false});
-    const ws = XLSX.utils.json_to_sheet(data.map(i => ({
-        'Nama': i.nama_guru, 'Tanggal': new Date(i.created_at).toLocaleDateString(), 
-        'Jam': new Date(i.created_at).toLocaleTimeString(), 'Tipe': i.tipe, 'Status': i.keterangan
-    })));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Rekap");
-    XLSX.writeFile(wb, "Rekap_Presensi_v2.5.xlsx");
-}
-
-async function showProfile() {
-    showScreen('profile-page');
-    const { data: hist } = await _supabase.from('presensi').select('*').eq('nama_guru', currentUser).order('created_at', {ascending:false}).limit(10);
-    document.getElementById('history-list').innerHTML = hist.map(h => `
-        <div class="history-card shadow-sm p-3 mb-2 bg-white rounded-4" style="border-left: 5px solid ${h.keterangan === 'Terlambat' ? 'red' : 'green'}">
-            <b>${h.tipe}</b> - <small>${h.keterangan}</small><br>
-            <span class="text-muted small">${new Date(h.created_at).toLocaleString()}</span>
-        </div>
-    `).join('');
 }
 </script>
 </body>
