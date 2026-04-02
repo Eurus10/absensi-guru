@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>E-Presensi Guru v2.8 - Password Eye</title>
+    <title>E-Presensi Guru v2.9 - Photo Verify</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -19,7 +19,6 @@
         .school-banner { padding: 20px; text-align: center; background: white; border-radius: 0 0 30px 30px; border-bottom: 2px solid #f0f0f0; }
         .school-logo { width: 60px; height: 60px; border-radius: 15px; object-fit: cover; margin-bottom: 5px; }
         
-        /* CSS Baru untuk Input Password dengan Mata */
         .pass-group { position: relative; }
         .toggle-password { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #94a3b8; z-index: 10; }
 
@@ -39,6 +38,11 @@
         .user-card.status-none { border-left-color: var(--danger); }
         .user-avatar-mini { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; object-fit: cover; background: #f0f0f0; }
         
+        /* Modal Foto Admin */
+        #photo-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: white; border-radius: 25px; width: 100%; max-width: 350px; text-align: center; padding: 15px; }
+        .modal-img { width: 100%; border-radius: 15px; margin-bottom: 15px; }
+
         .profile-header { text-align: center; margin-bottom: 20px; }
         .profile-img-container { position: relative; display: inline-block; }
         .profile-img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
@@ -46,6 +50,14 @@
     </style>
 </head>
 <body>
+
+<div id="photo-modal" onclick="this.style.display='none'">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h6 class="fw-bold mb-3" id="modal-title">Foto Presensi</h6>
+        <img id="modal-img-src" src="" class="modal-img">
+        <button class="btn btn-dark w-100 rounded-pill" onclick="document.getElementById('photo-modal').style.display='none'">Tutup</button>
+    </div>
+</div>
 
 <div class="app-shell">
     <div class="school-banner">
@@ -57,12 +69,10 @@
         <div class="mt-5 mb-4 text-primary"><i class="fas fa-fingerprint" style="font-size: 4rem;"></i></div>
         <h4 class="fw-bold mb-4">E-Presensi</h4>
         <input type="text" id="login-user" class="form-control mb-3 p-3 rounded-pill border-0 shadow-sm" placeholder="Username">
-        
         <div class="pass-group mb-4">
             <input type="password" id="login-pass" class="form-control p-3 rounded-pill border-0 shadow-sm" placeholder="Password">
             <i class="fas fa-eye toggle-password" onclick="togglePass('login-pass', this)"></i>
         </div>
-
         <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold mb-3 shadow" onclick="handleLogin()">MASUK</button>
         <p class="small">Guru baru? <a href="javascript:void(0)" onclick="showScreen('register-screen')">Daftar Akun</a></p>
     </div>
@@ -71,12 +81,10 @@
         <h4 class="fw-bold mb-4 text-center">Daftar Akun Guru</h4>
         <input type="text" id="reg-nama" class="form-control mb-3 p-3 rounded-4" placeholder="Nama Lengkap">
         <input type="text" id="reg-user" class="form-control mb-3 p-3 rounded-4" placeholder="Username Baru">
-        
         <div class="pass-group mb-4">
             <input type="password" id="reg-pass" class="form-control p-3 rounded-4" placeholder="Password Baru">
             <i class="fas fa-eye toggle-password" onclick="togglePass('reg-pass', this)"></i>
         </div>
-
         <button class="btn btn-dark w-100 py-3 rounded-pill fw-bold mb-3" onclick="handleRegister()">BUAT AKUN</button>
         <button class="btn btn-link w-100 small text-muted" onclick="showScreen('login-screen')">Kembali</button>
     </div>
@@ -145,7 +153,6 @@ window.onload = () => {
     showScreen('login-screen'); 
 };
 
-// FUNGSI BARU: TOGGLE LIHAT PASSWORD
 function togglePass(id, icon) {
     const input = document.getElementById(id);
     if (input.type === "password") {
@@ -169,6 +176,13 @@ function showScreen(id) {
     ['login-screen', 'register-screen', 'main-app', 'admin-panel', 'profile-page'].forEach(s => {
         document.getElementById(s).style.display = (s === id) ? 'block' : 'none';
     });
+}
+
+// FUNGSI ADMIN: LIHAT FOTO
+function viewPhoto(imgData, title) {
+    document.getElementById('modal-img-src').src = imgData;
+    document.getElementById('modal-title').innerText = "Foto " + title;
+    document.getElementById('photo-modal').style.display = 'flex';
 }
 
 async function handleRegister() {
@@ -214,11 +228,23 @@ async function takeAbsen(tipe) {
         const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(userLat*Math.PI/180) * Math.cos(SCHOOL_LAT*Math.PI/180) * Math.sin(dLon/2) * Math.sin(dLon/2);
         const jarak = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         if (jarak > MAX_DISTANCE) return alert(`Terlalu Jauh (${Math.round(jarak)}m)`);
+        
         const canvas = document.getElementById('canvas');
         canvas.width = 400; canvas.height = 400;
         canvas.getContext('2d').drawImage(document.getElementById('video'), 0, 0, 400, 400);
+        
+        const imgData = canvas.toDataURL('image/webp', 0.5);
         const status = (tipe === 'Masuk' && (now.getHours() > 7 || (now.getHours() === 7 && now.getMinutes() > 0))) ? "Terlambat" : "Tepat Waktu";
-        await _supabase.from('presensi').insert([{ nama_guru: currentUser, tipe: tipe, keterangan: status, foto: canvas.toDataURL('image/webp', 0.5), latitude: userLat, longitude: userLon }]);
+        
+        await _supabase.from('presensi').insert([{ 
+            nama_guru: currentUser, 
+            tipe: tipe, 
+            keterangan: status, 
+            foto: imgData, 
+            latitude: userLat, 
+            longitude: userLon 
+        }]);
+        
         alert("Absen Berhasil!"); checkTodayPresence();
     }, (err) => alert("GPS Error"), { enableHighAccuracy: true });
 }
@@ -230,15 +256,38 @@ async function loadAdminDashboard() {
     const sudahUsernames = [...new Set(todayPresensi.map(p => p.nama_guru))];
     const gurusDone = allGurus.filter(g => sudahUsernames.includes(g.username));
     const gurusNone = allGurus.filter(g => !sudahUsernames.includes(g.username));
+    
     document.getElementById('count-done').innerText = gurusDone.length;
     document.getElementById('count-none').innerText = gurusNone.length;
+    
     document.getElementById('list-sudah').innerHTML = gurusDone.map(g => {
         const pres = todayPresensi.filter(p => p.nama_guru === g.username);
         const hasMasuk = pres.find(p => p.tipe === 'Masuk');
         const hasPulang = pres.find(p => p.tipe === 'Pulang');
-        return `<div class="user-card status-done"><img src="${g.foto_avatar || 'https://ui-avatars.com/api/?name='+g.nama_lengkap}" class="user-avatar-mini"><div style="flex:1"><div class="fw-bold small">${g.nama_lengkap}</div><div class="text-muted" style="font-size:10px">${hasMasuk ? 'M: '+new Date(hasMasuk.created_at).toLocaleTimeString() : 'M: -'} | ${hasPulang ? 'P: '+new Date(hasPulang.created_at).toLocaleTimeString() : 'P: -'}</div></div><i class="fas fa-check-circle text-success"></i></div>`;
+        
+        return `
+            <div class="user-card status-done">
+                <img src="${g.foto_avatar || 'https://ui-avatars.com/api/?name='+g.nama_lengkap}" class="user-avatar-mini">
+                <div style="flex:1">
+                    <div class="fw-bold small">${g.nama_lengkap}</div>
+                    <div class="text-muted" style="font-size:10px">
+                        ${hasMasuk ? `<span class="text-success" onclick="viewPhoto('${hasMasuk.foto}', 'Masuk ${g.nama_lengkap}')" style="cursor:pointer"><i class="fas fa-camera"></i> M: ${new Date(hasMasuk.created_at).toLocaleTimeString()}</span>` : 'M: -'} | 
+                        ${hasPulang ? `<span class="text-danger" onclick="viewPhoto('${hasPulang.foto}', 'Pulang ${g.nama_lengkap}')" style="cursor:pointer"><i class="fas fa-camera"></i> P: ${new Date(hasPulang.created_at).toLocaleTimeString()}</span>` : 'P: -'}
+                    </div>
+                </div>
+                <i class="fas fa-check-circle text-success"></i>
+            </div>`;
     }).join('');
-    document.getElementById('list-belum').innerHTML = gurusNone.map(g => `<div class="user-card status-none"><img src="${g.foto_avatar || 'https://ui-avatars.com/api/?name='+g.nama_lengkap}" class="user-avatar-mini"><div style="flex:1"><div class="fw-bold small">${g.nama_lengkap}</div><div class="text-danger" style="font-size:10px">Belum ada keterangan</div></div><i class="fas fa-times-circle text-danger"></i></div>`).join('');
+
+    document.getElementById('list-belum').innerHTML = gurusNone.map(g => `
+        <div class="user-card status-none">
+            <img src="${g.foto_avatar || 'https://ui-avatars.com/api/?name='+g.nama_lengkap}" class="user-avatar-mini">
+            <div style="flex:1">
+                <div class="fw-bold small">${g.nama_lengkap}</div>
+                <div class="text-danger" style="font-size:10px">Belum ada keterangan</div>
+            </div>
+            <i class="fas fa-times-circle text-danger"></i>
+        </div>`).join('');
 }
 
 async function uploadFotoProfil(input) {
