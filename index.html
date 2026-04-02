@@ -10,21 +10,56 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     
+    <link rel="apple-touch-icon" href="ChatGPTImageApr1202609_31_16PM.jpeg">
+    <link rel="icon" type="image/jpeg" href="ChatGPTImageApr1202609_31_16PM.jpeg">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
-        :root { --primary: #6366f1; --success: #22c55e; --danger: #ef4444; }
-        body { margin: 0; min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif; background: linear-gradient(-45deg, #6366f1, #a855f7, #ec4899); background-size: 400% 400%; animation: gradientBG 10s ease infinite; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        :root { --primary: #6366f1; --success: #22c55e; --danger: #ef4444; --warning: #f59e0b; }
+        
+        body { 
+            margin: 0; 
+            min-height: 100vh; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: linear-gradient(-45deg, #6366f1, #a855f7, #ec4899); 
+            background-size: 400% 400%; 
+            animation: gradientBG 10s ease infinite; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
+
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         
-        .app-shell { width: 100%; max-width: 430px; height: 92vh; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border-radius: 35px; overflow-y: auto; position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
-        .school-banner { padding: 20px; text-align: center; background: white; border-radius: 0 0 30px 30px; border-bottom: 2px solid #f0f0f0; }
-        .school-logo { width: 60px; height: 60px; border-radius: 15px; object-fit: cover; }
+        .app-shell { 
+            width: 100%; 
+            max-width: 430px; 
+            height: 92vh; 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(15px); 
+            border-radius: 35px; 
+            overflow-y: auto; 
+            position: relative; 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); 
+        }
+
+        .school-banner { 
+            padding: 20px; 
+            text-align: center; 
+            background: white; 
+            border-radius: 0 0 30px 30px; 
+            border-bottom: 2px solid #f0f0f0; 
+        }
+
+        .school-logo { width: 60px; height: 60px; border-radius: 15px; object-fit: cover; margin-bottom: 5px; }
         
-        /* Input & Password Eye */
+        /* Input & UI Components */
         .pass-group { position: relative; }
         .toggle-password { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #94a3b8; z-index: 10; }
 
@@ -38,69 +73,76 @@
         
         #login-screen, #register-screen, #main-app, #admin-panel, #profile-page { display: none; padding: 20px; }
         
-        /* Modals */
-        #photo-modal, #reminder-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: white; border-radius: 25px; width: 100%; max-width: 350px; text-align: center; padding: 25px; }
+        /* Modal Reminder & Photo */
+        #photo-modal, #reminder-modal { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.85); z-index: 9999; display: none; 
+            align-items: center; justify-content: center; padding: 20px; 
+        }
+        .modal-content-custom { background: white; border-radius: 30px; width: 100%; max-width: 350px; text-align: center; padding: 25px; position: relative; }
 
+        /* Admin List UI */
         .admin-section-title { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin: 20px 0 10px 5px; display: flex; justify-content: space-between; }
         .user-card { background: white; border-radius: 15px; padding: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; align-items: center; border-left: 5px solid #eee; }
         .user-card.status-done { border-left-color: var(--success); }
         .user-card.status-none { border-left-color: var(--danger); }
         .user-avatar-mini { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; object-fit: cover; background: #f0f0f0; }
+
+        .history-card { border-radius: 12px; padding: 10px; margin-bottom: 8px; font-size: 0.85rem; }
     </style>
 </head>
 <body>
 
 <div id="reminder-modal">
-    <div class="modal-content">
-        <div class="text-danger mb-3"><i class="fas fa-bell fa-3x"></i></div>
-        <h5 class="fw-bold">Halo Bapak/Ibu Guru!</h5>
-        <p class="text-muted small">Sistem mendeteksi Anda <b>belum melakukan presensi</b> hari ini. Silahkan lakukan absen sekarang.</p>
-        <button class="btn btn-primary w-100 rounded-pill fw-bold" onclick="closeReminder()">SIAP, ABSEN!</button>
+    <div class="modal-content-custom">
+        <div class="text-danger mb-3"><i class="fas fa-bell-exclamation fa-4x"></i></div>
+        <h5 class="fw-bold">Belum Presensi!</h5>
+        <p class="text-muted small">Halo Bapak/Ibu, sistem mendeteksi Anda belum melakukan absen hari ini. Silahkan absen sekarang.</p>
+        <button class="btn btn-primary w-100 rounded-pill fw-bold" onclick="closeReminder()">ABSEN SEKARANG</button>
     </div>
 </div>
 
 <div id="photo-modal" onclick="this.style.display='none'">
-    <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-content-custom" onclick="event.stopPropagation()">
         <h6 class="fw-bold mb-3" id="modal-title">Foto Presensi</h6>
-        <img id="modal-img-src" src="" style="width:100%; border-radius:15px; margin-bottom:15px; box-shadow:0 5px 15px rgba(0,0,0,0.2);">
+        <img id="modal-img-src" src="" style="width:100%; border-radius:20px; margin-bottom:15px;">
         <button class="btn btn-dark w-100 rounded-pill" onclick="document.getElementById('photo-modal').style.display='none'">Tutup</button>
     </div>
 </div>
 
 <div class="app-shell">
     <div class="school-banner">
-        <img id="logo-img" src="" class="school-logo">
-        <h6 id="school-name" class="fw-bold m-0 text-uppercase" style="color: var(--primary); font-size: 0.75rem; letter-spacing: 1px;">Memuat...</h6>
+        <img id="logo-img" src="ChatGPTImageApr1202609_31_16PM.jpeg" class="school-logo">
+        <h6 id="school-name" class="fw-bold m-0 text-uppercase" style="color: var(--primary); font-size: 0.75rem;">MEMUAT...</h6>
     </div>
 
     <div id="login-screen" class="text-center">
-        <div class="mt-5 mb-4 text-primary"><i class="fas fa-fingerprint" style="font-size: 4rem;"></i></div>
-        <h4 class="fw-bold mb-4">E-Presensi</h4>
+        <div class="mt-5 mb-4 text-primary"><i class="fas fa-id-card-alt" style="font-size: 4rem;"></i></div>
+        <h4 class="fw-bold mb-4">E-Presensi Guru</h4>
         <input type="text" id="login-user" class="form-control mb-3 p-3 rounded-pill border-0 shadow-sm" placeholder="Username">
         <div class="pass-group mb-4">
             <input type="password" id="login-pass" class="form-control p-3 rounded-pill border-0 shadow-sm" placeholder="Password">
             <i class="fas fa-eye toggle-password" onclick="togglePass('login-pass', this)"></i>
         </div>
-        <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold mb-3 shadow" onclick="handleLogin()">MASUK</button>
-        <p class="small text-muted">Guru baru? <a href="javascript:void(0)" class="text-decoration-none fw-bold" onclick="showScreen('register-screen')">Daftar Akun</a></p>
+        <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold mb-3 shadow" onclick="handleLogin()">MASUK APLIKASI</button>
+        <p class="small">Belum punya akun? <a href="javascript:void(0)" class="fw-bold text-decoration-none" onclick="showScreen('register-screen')">Daftar Sekarang</a></p>
     </div>
 
     <div id="register-screen">
-        <h4 class="fw-bold mb-4 text-center">Daftar Akun</h4>
+        <h4 class="fw-bold mb-4 text-center">Registrasi Guru</h4>
         <input type="text" id="reg-nama" class="form-control mb-3 p-3 rounded-4" placeholder="Nama Lengkap">
-        <input type="text" id="reg-user" class="form-control mb-3 p-3 rounded-4" placeholder="Username Baru">
+        <input type="text" id="reg-user" class="form-control mb-3 p-3 rounded-4" placeholder="Buat Username">
         <div class="pass-group mb-4">
-            <input type="password" id="reg-pass" class="form-control p-3 rounded-4" placeholder="Password Baru">
+            <input type="password" id="reg-pass" class="form-control p-3 rounded-4" placeholder="Buat Password">
             <i class="fas fa-eye toggle-password" onclick="togglePass('reg-pass', this)"></i>
         </div>
-        <button class="btn btn-dark w-100 py-3 rounded-pill fw-bold mb-3" onclick="handleRegister()">BUAT AKUN</button>
-        <button class="btn btn-link w-100 small text-muted text-decoration-none" onclick="showScreen('login-screen')">Kembali</button>
+        <button class="btn btn-dark w-100 py-3 rounded-pill fw-bold mb-3" onclick="handleRegister()">DAFTARKAN AKUN</button>
+        <button class="btn btn-link w-100 small text-muted text-decoration-none" onclick="showScreen('login-screen')">Kembali ke Login</button>
     </div>
 
     <div id="main-app">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <div><small class="text-muted">Selamat Datang,</small><h6 class="fw-bold m-0" id="user-display">-</h6></div>
+            <div><small class="text-muted">Guru Aktif:</small><h6 class="fw-bold m-0" id="user-display">-</h6></div>
             <img id="mini-avatar" src="" style="width:50px; height:50px; border-radius:50%; border:2px solid white; object-fit:cover; cursor:pointer" onclick="showProfile()">
         </div>
         <div class="camera-container"><video id="video" autoplay playsinline></video></div>
@@ -109,13 +151,13 @@
             <p id="date" class="text-muted small mb-3 text-capitalize"></p>
             <button id="btn-masuk" class="btn-action btn-masuk shadow-lg" onclick="takeAbsen('Masuk')">ABSEN MASUK</button>
             <button id="btn-pulang" class="btn-action btn-pulang shadow-lg" onclick="takeAbsen('Pulang')">ABSEN PULANG</button>
-            <p id="info-pulang" class="text-danger small fw-bold d-none"><i class="fas fa-lock"></i> Absen pulang dibuka jam 14:00</p>
+            <p id="info-pulang" class="text-danger small fw-bold d-none"><i class="fas fa-clock"></i> Pulang mulai jam 14:00</p>
         </div>
     </div>
 
     <div id="admin-panel">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-bold m-0">Dashboard Admin</h5>
+            <h5 class="fw-bold m-0">Admin Dashboard</h5>
             <button class="btn btn-success btn-sm rounded-pill px-3" onclick="exportData()"><i class="fas fa-file-excel"></i> Excel</button>
         </div>
         <div id="list-sudah"></div>
@@ -134,15 +176,16 @@
             <h5 id="p-nama" class="fw-bold mt-2 mb-0">-</h5>
             <p id="p-username" class="text-muted small">@username</p>
         </div>
-        <h6 class="fw-bold small mb-2"><i class="fas fa-history"></i> Riwayat Absen (10 Terakhir)</h6>
+        <h6 class="fw-bold small mb-2"><i class="fas fa-calendar-alt"></i> Riwayat Terakhir</h6>
         <div id="history-list"></div>
-        <button class="btn btn-outline-danger btn-sm w-100 mt-4 rounded-pill" onclick="logout()">LOGOUT AKUN</button>
+        <button class="btn btn-outline-danger btn-sm w-100 mt-4 rounded-pill" onclick="logout()">KELUAR AKUN</button>
     </div>
 </div>
 
 <canvas id="canvas" style="display:none;"></canvas>
 
 <script>
+// KONFIGURASI DATABASE
 const SUPABASE_URL = 'https://dddbjqnoovjbdesvaulo.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkZGJqcW5vb3ZqYmRlc3ZhdWxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNDAzMTUsImV4cCI6MjA5MDYxNjMxNX0.yLeBX4C8bwpCngvOViMR-eocHVFjv0BXXBuPJWwb9KU';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -155,12 +198,13 @@ let currentUser = "";
 let userData = null;
 
 window.onload = () => { 
-    updateClock(); setInterval(updateClock, 1000); 
+    updateClock(); 
+    setInterval(updateClock, 1000); 
     loadSchoolData(); 
     checkAutoLogin(); 
 };
 
-// AUTO LOGIN LOGIC
+// --- LOGIKA AUTO LOGIN ---
 async function checkAutoLogin() {
     const savedUser = localStorage.getItem('guru_user');
     const savedPass = localStorage.getItem('guru_pass');
@@ -191,16 +235,18 @@ function processLogin(data) {
 async function handleLogin() {
     const u = document.getElementById('login-user').value;
     const p = document.getElementById('login-pass').value;
+    
     if(u === "admin" && p === "admin123") {
         localStorage.setItem('guru_user', u); localStorage.setItem('guru_pass', p);
         showScreen('admin-panel'); loadAdminDashboard(); return;
     }
+    
     const { data } = await _supabase.from('profil_guru').select('*').eq('username', u).eq('password', p).single();
     if(data) {
         localStorage.setItem('guru_user', u); 
         localStorage.setItem('guru_pass', p); 
         processLogin(data);
-    } else alert("Gagal Login! Cek Username/Password.");
+    } else alert("Gagal Login! Periksa kembali Username/Password.");
 }
 
 function logout() {
@@ -208,32 +254,104 @@ function logout() {
     location.reload();
 }
 
+// --- LOGIKA PRESENSI ---
 async function checkTodayPresence() {
     const today = new Date().toISOString().split('T')[0];
     const { data } = await _supabase.from('presensi').select('tipe').eq('nama_guru', currentUser).gte('created_at', today);
     
     if(data.length === 0) document.getElementById('reminder-modal').style.display = 'flex';
 
-    const hasMasuk = data.some(d => d.tipe === 'Masuk');
-    const hasPulang = data.some(d => d.tipe === 'Pulang');
-    if(hasMasuk) { let bm = document.getElementById('btn-masuk'); bm.classList.add('btn-disabled'); bm.onclick = null; bm.innerText = "SUDAH ABSEN MASUK"; }
-    if(hasPulang) { let bp = document.getElementById('btn-pulang'); bp.classList.add('btn-disabled'); bp.onclick = null; bp.innerText = "SUDAH ABSEN PULANG"; }
+    const hasM = data.some(d => d.tipe === 'Masuk');
+    const hasP = data.some(d => d.tipe === 'Pulang');
+    if(hasM) { let b = document.getElementById('btn-masuk'); b.classList.add('btn-disabled'); b.onclick = null; b.innerText = "SUDAH ABSEN MASUK"; }
+    if(hasP) { let b = document.getElementById('btn-pulang'); b.classList.add('btn-disabled'); b.onclick = null; b.innerText = "SUDAH ABSEN PULANG"; }
 }
 
 function closeReminder() { document.getElementById('reminder-modal').style.display = 'none'; }
 
-// CORE FUNCTIONS
+async function takeAbsen(tipe) {
+    const now = new Date();
+    if(tipe === 'Pulang' && now.getHours() < 14) return alert("Belum waktunya absen pulang (14:00)!");
+    
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+        const uLat = pos.coords.latitude; const uLon = pos.coords.longitude;
+        const R = 6371e3;
+        const dLat = (SCHOOL_LAT - uLat) * Math.PI/180;
+        const dLon = (SCHOOL_LON - uLon) * Math.PI/180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(uLat*Math.PI/180) * Math.cos(SCHOOL_LAT*Math.PI/180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        const jarak = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        
+        if (jarak > MAX_DISTANCE) return alert(`Terlalu Jauh! Jarak Anda ${Math.round(jarak)}m dari sekolah.`);
+        
+        const canvas = document.getElementById('canvas');
+        canvas.width = 400; canvas.height = 400;
+        canvas.getContext('2d').drawImage(document.getElementById('video'), 0, 0, 400, 400);
+        const imgData = canvas.toDataURL('image/webp', 0.5);
+        const status = (tipe === 'Masuk' && (now.getHours() > 7 || (now.getHours() === 7 && now.getMinutes() > 0))) ? "Terlambat" : "Tepat Waktu";
+        
+        await _supabase.from('presensi').insert([{ 
+            nama_guru: currentUser, tipe: tipe, keterangan: status, 
+            foto: imgData, latitude: uLat, longitude: uLon 
+        }]);
+        
+        alert("Absen " + tipe + " Berhasil!"); 
+        checkTodayPresence();
+    }, (err) => alert("GPS Gagal diakses. Izinkan lokasi!"), { enableHighAccuracy: true });
+}
+
+// --- ADMIN FUNCTIONS ---
+async function loadAdminDashboard() {
+    const today = new Date().toISOString().split('T')[0];
+    const { data: listGuru } = await _supabase.from('profil_guru').select('*').order('nama_lengkap');
+    const { data: presensiToday } = await _supabase.from('presensi').select('*').gte('created_at', today);
+    
+    const sudah = listGuru.filter(g => presensiToday.some(p => p.nama_guru === g.username));
+    const belum = listGuru.filter(g => !presensiToday.some(p => p.nama_guru === g.username));
+    
+    document.getElementById('list-sudah').innerHTML = `<div class="admin-section-title"><span>Sudah Absen</span><span class="badge bg-success">${sudah.length}</span></div>` + sudah.map(g => {
+        const prs = presensiToday.filter(p => p.nama_guru === g.username);
+        const m = prs.find(p => p.tipe === 'Masuk');
+        const p = prs.find(p => p.tipe === 'Pulang');
+        return `
+            <div class="user-card status-done">
+                <img src="${g.foto_avatar || 'https://ui-avatars.com/api/?name='+g.nama_lengkap}" class="user-avatar-mini">
+                <div style="flex:1">
+                    <div class="fw-bold small">${g.nama_lengkap}</div>
+                    <div class="text-muted" style="font-size:10px">
+                        ${m ? `<span class="text-success" onclick="viewPhoto('${m.foto}', 'M: ${g.nama_lengkap}')"><i class="fas fa-camera"></i> M: ${new Date(m.created_at).toLocaleTimeString()}</span>` : 'M: -'} | 
+                        ${p ? `<span class="text-danger" onclick="viewPhoto('${p.foto}', 'P: ${g.nama_lengkap}')"><i class="fas fa-camera"></i> P: ${new Date(p.created_at).toLocaleTimeString()}</span>` : 'P: -'}
+                    </div>
+                </div>
+                <i class="fas fa-check-circle text-success"></i>
+            </div>`;
+    }).join('');
+
+    document.getElementById('list-belum').innerHTML = `<div class="admin-section-title"><span>Belum Absen</span><span class="badge bg-danger">${belum.length}</span></div>` + belum.map(g => `
+        <div class="user-card status-none">
+            <img src="${g.foto_avatar || 'https://ui-avatars.com/api/?name='+g.nama_lengkap}" class="user-avatar-mini">
+            <div style="flex:1"><div class="fw-bold small">${g.nama_lengkap}</div><div class="text-danger" style="font-size:10px">Tidak ada data hari ini</div></div>
+            <i class="fas fa-times-circle text-danger"></i>
+        </div>`).join('');
+}
+
+function viewPhoto(img, title) { 
+    document.getElementById('modal-img-src').src = img; 
+    document.getElementById('modal-title').innerText = "Foto " + title; 
+    document.getElementById('photo-modal').style.display = 'flex'; 
+}
+
+// --- UI & MISC ---
 function togglePass(id, icon) {
-    const input = document.getElementById(id);
-    if (input.type === "password") { input.type = "text"; icon.classList.replace('fa-eye', 'fa-eye-slash'); }
-    else { input.type = "password"; icon.classList.replace('fa-eye-slash', 'fa-eye'); }
+    const x = document.getElementById(id);
+    if (x.type === "password") { x.type = "text"; icon.classList.replace('fa-eye', 'fa-eye-slash'); }
+    else { x.type = "password"; icon.classList.replace('fa-eye-slash', 'fa-eye'); }
 }
 
 function updateClock() {
-    const now = new Date();
-    document.getElementById('clock').innerText = now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
-    document.getElementById('date').innerText = now.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'});
-    if (now.getHours() < 14) document.getElementById('info-pulang').classList.remove('d-none');
+    const n = new Date();
+    document.getElementById('clock').innerText = n.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+    document.getElementById('date').innerText = n.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'});
+    if (n.getHours() < 14) document.getElementById('info-pulang').classList.remove('d-none');
     else document.getElementById('info-pulang').classList.add('d-none');
 }
 
@@ -243,60 +361,14 @@ function showScreen(id) {
     });
 }
 
-async function takeAbsen(tipe) {
-    const now = new Date();
-    if(tipe === 'Pulang' && now.getHours() < 14) return alert("Belum jam 14:00!");
-    
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-        const userLat = pos.coords.latitude; const userLon = pos.coords.longitude;
-        const R = 6371e3;
-        const dLat = (SCHOOL_LAT - userLat) * Math.PI/180;
-        const dLon = (SCHOOL_LON - userLon) * Math.PI/180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(userLat*Math.PI/180) * Math.cos(SCHOOL_LAT*Math.PI/180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-        const jarak = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        
-        if (jarak > MAX_DISTANCE) return alert(`Gagal! Anda berada di luar radius sekolah (${Math.round(jarak)} meter).`);
-        
-        const canvas = document.getElementById('canvas');
-        canvas.width = 400; canvas.height = 400;
-        canvas.getContext('2d').drawImage(document.getElementById('video'), 0, 0, 400, 400);
-        const imgData = canvas.toDataURL('image/webp', 0.5);
-        const status = (tipe === 'Masuk' && (now.getHours() > 7 || (now.getHours() === 7 && now.getMinutes() > 0))) ? "Terlambat" : "Tepat Waktu";
-        
-        await _supabase.from('presensi').insert([{ nama_guru: currentUser, tipe: tipe, keterangan: status, foto: imgData, latitude: userLat, longitude: userLon }]);
-        alert("Berhasil melakukan presensi " + tipe); 
-        checkTodayPresence();
-    }, (err) => alert("GPS harus aktif!"), { enableHighAccuracy: true });
-}
-
-async function loadAdminDashboard() {
-    const today = new Date().toISOString().split('T')[0];
-    const { data: allGurus } = await _supabase.from('profil_guru').select('*').order('nama_lengkap');
-    const { data: todayPresensi } = await _supabase.from('presensi').select('*').gte('created_at', today);
-    const sudahUsernames = [...new Set(todayPresensi.map(p => p.nama_guru))];
-    const gurusDone = allGurus.filter(g => sudahUsernames.includes(g.username));
-    const gurusNone = allGurus.filter(g => !sudahUsernames.includes(g.username));
-    
-    document.getElementById('list-sudah').innerHTML = `<div class="admin-section-title"><span>Sudah Absen</span><span class="badge bg-success">${gurusDone.length}</span></div>` + gurusDone.map(g => {
-        const pres = todayPresensi.filter(p => p.nama_guru === g.username);
-        const hasM = pres.find(p => p.tipe === 'Masuk');
-        const hasP = pres.find(p => p.tipe === 'Pulang');
-        return `<div class="user-card status-done"><img src="${g.foto_avatar || 'https://ui-avatars.com/api/?name='+g.nama_lengkap}" class="user-avatar-mini"><div style="flex:1"><div class="fw-bold small">${g.nama_lengkap}</div><div class="text-muted" style="font-size:10px">${hasM ? `<span class="text-success" onclick="viewPhoto('${hasM.foto}', 'Masuk ${g.nama_lengkap}')"><i class="fas fa-camera"></i> M: ${new Date(hasM.created_at).toLocaleTimeString()}</span>` : 'M: -'} | ${hasP ? `<span class="text-danger" onclick="viewPhoto('${hasP.foto}', 'Pulang ${g.nama_lengkap}')"><i class="fas fa-camera"></i> P: ${new Date(hasP.created_at).toLocaleTimeString()}</span>` : 'P: -'}</div></div><i class="fas fa-check-circle text-success"></i></div>`;
-    }).join('');
-
-    document.getElementById('list-belum').innerHTML = `<div class="admin-section-title"><span>Belum Absen</span><span class="badge bg-danger">${gurusNone.length}</span></div>` + gurusNone.map(g => `<div class="user-card status-none"><img src="${g.foto_avatar || 'https://ui-avatars.com/api/?name='+g.nama_lengkap}" class="user-avatar-mini"><div style="flex:1"><div class="fw-bold small">${g.nama_lengkap}</div><div class="text-danger" style="font-size:10px">Absen belum terdata</div></div><i class="fas fa-times-circle text-danger"></i></div>`).join('');
-}
-
-function viewPhoto(img, title) { document.getElementById('modal-img-src').src = img; document.getElementById('modal-title').innerText = "Foto " + title; document.getElementById('photo-modal').style.display = 'flex'; }
-
 async function handleRegister() {
-    const nama = document.getElementById('reg-nama').value;
-    const user = document.getElementById('reg-user').value;
-    const pass = document.getElementById('reg-pass').value;
-    if(!nama || !user || !pass) return alert("Isi semua kolom!");
-    const { error } = await _supabase.from('profil_guru').insert([{ username: user, password: pass, nama_lengkap: nama }]);
-    if(!error) { alert("Berhasil! Silahkan login."); showScreen('login-screen'); }
-    else alert("Username sudah digunakan.");
+    const n = document.getElementById('reg-nama').value;
+    const u = document.getElementById('reg-user').value;
+    const p = document.getElementById('reg-pass').value;
+    if(!n || !u || !p) return alert("Lengkapi data!");
+    const { error } = await _supabase.from('profil_guru').insert([{ username: u, password: p, nama_lengkap: n }]);
+    if(!error) { alert("Akun berhasil dibuat!"); showScreen('login-screen'); }
+    else alert("Gagal! Username mungkin sudah ada.");
 }
 
 async function uploadFotoProfil(input) {
@@ -305,7 +377,7 @@ async function uploadFotoProfil(input) {
     reader.onload = async (e) => {
         const base64 = e.target.result;
         const { error } = await _supabase.from('profil_guru').update({ foto_avatar: base64 }).eq('username', currentUser);
-        if(!error) { document.getElementById('p-img').src = base64; document.getElementById('mini-avatar').src = base64; alert("Foto profil diperbarui!"); }
+        if(!error) { document.getElementById('p-img').src = base64; document.getElementById('mini-avatar').src = base64; alert("Foto Profil Diperbarui!"); }
     };
     reader.readAsDataURL(file);
 }
@@ -316,32 +388,36 @@ async function showProfile() {
     document.getElementById('p-username').innerText = "@" + userData.username;
     document.getElementById('p-img').src = userData.foto_avatar || `https://ui-avatars.com/api/?name=${userData.nama_lengkap}`;
     const { data: hist } = await _supabase.from('presensi').select('*').eq('nama_guru', currentUser).order('created_at', {ascending:false}).limit(10);
-    document.getElementById('history-list').innerHTML = hist.map(h => `<div class="history-card shadow-sm p-2 mb-2 bg-white rounded-3 small" style="border-left: 4px solid ${h.keterangan === 'Terlambat' ? 'red' : 'green'}"><b>${h.tipe}</b> - ${h.keterangan} <br> <span class="text-muted" style="font-size:10px">${new Date(h.created_at).toLocaleString()}</span></div>`).join('');
+    document.getElementById('history-list').innerHTML = hist.map(h => `
+        <div class="history-card shadow-sm bg-white border-start border-4 border-${h.keterangan === 'Terlambat' ? 'danger' : 'success'}">
+            <b>${h.tipe}</b> <span class="badge ${h.keterangan === 'Terlambat' ? 'bg-danger' : 'bg-success'} float-end">${h.keterangan}</span><br>
+            <small class="text-muted">${new Date(h.created_at).toLocaleString()}</small>
+        </div>`).join('');
 }
 
 async function exportData() {
     const { data } = await _supabase.from('presensi').select('*').order('created_at', {ascending: true});
     const grouped = {};
-    data.forEach(item => {
-        const tgl = new Date(item.created_at).toLocaleDateString('id-ID');
-        const key = `${item.nama_guru}_${tgl}`;
-        if(!grouped[key]) grouped[key] = { 'Nama Guru': item.nama_guru, 'Tanggal': tgl, 'Jam Masuk': '-', 'Status Masuk': '-', 'Jam Pulang': '-', 'Status Pulang': '-' };
-        if(item.tipe === 'Masuk') { grouped[key]['Jam Masuk'] = new Date(item.created_at).toLocaleTimeString('id-ID'); grouped[key]['Status Masuk'] = item.keterangan; }
-        else { grouped[key]['Jam Pulang'] = new Date(item.created_at).toLocaleTimeString('id-ID'); grouped[key]['Status Pulang'] = item.keterangan; }
+    data.forEach(it => {
+        const tgl = new Date(it.created_at).toLocaleDateString('id-ID');
+        const key = `${it.nama_guru}_${tgl}`;
+        if(!grouped[key]) grouped[key] = { 'Nama Guru': it.nama_guru, 'Tanggal': tgl, 'Masuk': '-', 'Status M': '-', 'Pulang': '-', 'Status P': '-' };
+        if(it.tipe === 'Masuk') { grouped[key]['Masuk'] = new Date(it.created_at).toLocaleTimeString(); grouped[key]['Status M'] = it.keterangan; }
+        else { grouped[key]['Pulang'] = new Date(it.created_at).toLocaleTimeString(); grouped[key]['Status P'] = it.keterangan; }
     });
     const ws = XLSX.utils.json_to_sheet(Object.values(grouped));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Rekap");
-    XLSX.writeFile(wb, `Laporan_Absen.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, "Data Absen");
+    XLSX.writeFile(wb, `Laporan_Presensi.xlsx`);
 }
 
 async function loadSchoolData() {
     const { data } = await _supabase.from('pengaturan').select('*').eq('id', 1).single();
-    if(data) { document.getElementById('logo-img').src = data.logo_url; document.getElementById('school-name').innerText = data.nama_sekolah; }
+    if(data) { document.getElementById('school-name').innerText = data.nama_sekolah; }
 }
 
 function startCamera() {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }).then(s => document.getElementById('video').srcObject = s);
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }).then(s => document.getElementById('video').srcObject = s).catch(e => alert("Gagal akses kamera!"));
 }
 </script>
 </body>
