@@ -1,0 +1,24 @@
+{
+  "short_name": "E-Presensi",
+  "name": "Sistem Presensi Guru Digital",
+  "description": "Aplikasi Absensi Guru Berbasis GPS dan Kamera",
+  "icons": [
+    {
+      "src": "ChatGPTImageApr1202609_31_16PM.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "ChatGPTImageApr1202609_31_16PM.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#6366f1",
+  "theme_color": "#6366f1"
+}
