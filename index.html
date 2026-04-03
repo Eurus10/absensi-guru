@@ -1,299 +1,551 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>E-Presensi Guru v4.0</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>E-Presensi Guru v3.8 - Ultimate</title>
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-:root { --primary:#6366f1; --success:#22c55e; --danger:#ef4444; }
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
 
-body{
-margin:0;
-height:100vh;
-font-family:'Plus Jakarta Sans',sans-serif;
-background:linear-gradient(-45deg,#6366f1,#a855f7,#ec4899);
-background-size:400% 400%;
-animation:gradientBG 15s ease infinite;
-overflow:hidden;
-}
-@keyframes gradientBG{
-0%{background-position:0% 50%}
-50%{background-position:100% 50%}
-100%{background-position:0% 50%}
-}
+        :root {
+            --primary: #6366f1;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
 
-.app-shell{
-width:100%;
-height:100vh;
-background:rgba(255,255,255,0.96);
-overflow-y:auto;
-}
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(-45deg, #6366f1, #a855f7, #ec4899);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
 
-.school-banner{
-padding:15px;
-text-align:center;
-background:white;
-border-bottom:1px solid #eee;
-}
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-#main-app{
-display:flex;
-flex-direction:column;
-height:calc(100vh - 90px);
-}
+        .app-shell {
+            width: 100%;
+            max-width: 430px;
+            height: 92vh;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            border-radius: 35px;
+            overflow-y: auto;
+            position: relative;
+            border: 4px solid white;
+        }
 
-.camera-box{
-width:220px;
-height:220px;
-border-radius:50%;
-overflow:hidden;
-margin:0 auto 20px;
-background:#000;
-border:5px solid white;
-box-shadow:0 10px 30px rgba(0,0,0,0.15);
-}
-#video{
-width:100%;
-height:100%;
-object-fit:cover;
-transform:scaleX(-1);
-}
+        .school-banner {
+            padding: 15px;
+            text-align: center;
+            background: white;
+            border-radius: 0 0 30px 30px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
 
-.cool-btn{
-border:none;
-border-radius:20px;
-padding:15px;
-color:white;
-font-weight:800;
-transition:0.3s;
-}
-.btn-masuk{background:linear-gradient(135deg,#10b981,#059669);}
-.btn-izin{background:linear-gradient(135deg,#f59e0b,#d97706);}
-.btn-pulang{background:linear-gradient(135deg,#ef4444,#dc2626);}
-.btn-disabled{background:#cbd5e1 !important;color:#64748b !important;opacity:0.6;cursor:not-allowed;}
+        .camera-box {
+            margin: 0 20px 15px;
+            border-radius: 25px;
+            overflow: hidden;
+            height: 180px;
+            background: #000;
+            border: 3px solid white;
+        }
 
-.user-card{
-background:white;
-border-radius:18px;
-padding:15px;
-margin-bottom:12px;
-box-shadow:0 3px 10px rgba(0,0,0,0.05);
-border-left:5px solid #6366f1;
-}
-.user-card small{font-size:0.85rem}
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+        }
 
-#login-screen,#register-screen,#main-app,#admin-panel,#profile-page{
-display:none;
-padding:20px;
-}
-</style>
+        .cool-btn {
+            border: none;
+            border-radius: 20px;
+            padding: 15px;
+            color: white;
+            font-weight: 800;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-masuk { background: linear-gradient(135deg, #10b981, #059669); }
+        .btn-izin { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .btn-pulang {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            width: 100%;
+            margin-top: 10px;
+            flex-direction: row;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-disabled {
+            background: #cbd5e1 !important;
+            color: #64748b !important;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .user-card {
+            background: white;
+            border-radius: 18px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid #f1f5f9;
+        }
+
+        .admin-thumb {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            transition: 0.2s;
+        }
+
+        .admin-thumb:hover { transform: scale(1.1); }
+
+        #photo-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 25px;
+        }
+
+        .modal-content-img {
+            background: white;
+            padding: 15px;
+            border-radius: 25px;
+            width: 100%;
+            max-width: 320px;
+            text-align: center;
+        }
+
+        .pass-container { position: relative; }
+        .toggle-pass {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        #login-screen, #register-screen, #main-app, #admin-panel, #profile-page {
+            display: none;
+            padding: 20px;
+        }
+    </style>
 </head>
+
 <body>
 
-<div class="app-shell">
+    <div id="photo-modal" onclick="this.style.display='none'">
+        <div class="modal-content-img" onclick="event.stopPropagation()">
+            <h6 id="modal-title" class="fw-bold text-primary mb-2 small text-uppercase">PREVIEW FOTO</h6>
+            <img id="modal-img" src="" class="w-100 rounded-3 mb-3" style="max-height: 400px; object-fit: contain;">
+            <button class="btn btn-dark w-100 rounded-pill fw-bold btn-sm py-2" onclick="document.getElementById('photo-modal').style.display='none'">TUTUP</button>
+        </div>
+    </div>
 
-<div class="school-banner">
-<img src="ChatGPTImageApr1202609_31_16PM.jpeg" style="width:45px;height:45px;border-radius:12px;">
-<h6 class="fw-bold m-0 mt-2 text-primary small" id="school-name">SISTEM PRESENSI</h6>
-</div>
+    <div class="app-shell">
+        <div class="school-banner shadow-sm">
+            <img id="logo-img" src="ChatGPTImageApr1202609_31_16PM.jpeg" style="width:45px; height:45px; border-radius:12px; object-fit:cover;">
+            <h6 id="school-name" class="fw-bold m-0 mt-2 text-primary small">SISTEM PRESENSI</h6>
+        </div>
 
-<!-- MAIN APP -->
-<div id="main-app">
+        <div id="main-app" class="px-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div><small class="text-muted">Halo,</small>
+                    <h6 class="fw-bold m-0" id="user-display">-</h6>
+                </div>
+                <img id="mini-avatar" src="" style="width:48px; height:48px; border-radius:15px; object-fit:cover; border:2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" onclick="showProfile()">
+            </div>
+            <div class="text-center mb-3">
+                <h1 id="clock" class="fw-bold m-0" style="font-size: 2.8rem; color: #1e293b; letter-spacing: -1px;">00:00</h1>
+                <p id="date" class="text-muted fw-bold small text-uppercase"></p>
+            </div>
+            <div class="camera-box"><video id="video" autoplay playsinline></video></div>
+            <div class="row gx-2">
+                <div class="col-6"><button id="btn-masuk" class="cool-btn btn-masuk w-100" onclick="takeAbsen('Masuk')"><i class="fas fa-camera mb-1"></i> MASUK</button></div>
+                <div class="col-6"><button id="btn-izin" class="cool-btn btn-izin w-100" onclick="takeIzin()"><i class="fas fa-envelope mb-1"></i> IZIN</button></div>
+            </div>
+            <button id="btn-pulang" class="cool-btn btn-pulang" onclick="takeAbsen('Pulang')"><i class="fas fa-home"></i> ABSEN PULANG</button>
+            <p id="lock-msg" class="text-center text-muted small mt-2 d-none">Tombol pulang aktif: 14:00 - 17:00</p>
+        </div>
 
-<div class="mb-3">
-<small class="text-muted">Halo,</small>
-<h6 class="fw-bold m-0" id="user-display">-</h6>
-</div>
+        <div id="admin-panel" class="px-3">
+            <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2">
+                <h6 class="fw-bold m-0">MONITORING GURU</h6>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary btn-sm rounded-circle" onclick="loadAdminDashboard()" title="Refresh Data"><i class="fas fa-sync-alt"></i></button>
+                    <button class="btn btn-success btn-sm rounded-pill" onclick="exportDataHorizontal()"><i class="fas fa-file-excel"></i> REKAP</button>
+                    <button class="btn btn-danger btn-sm rounded-circle" onclick="logout()"><i class="fas fa-power-off"></i></button>
+                </div>
+            </div>
+            <div id="admin-stats" class="small text-muted mb-2 fw-bold"></div>
+            <div id="list-admin-view"></div>
+        </div>
 
-<div class="text-center mb-2">
-<h1 id="clock" class="fw-bold m-0" style="font-size:2.5rem;">00:00</h1>
-<p id="date" class="text-muted small"></p>
-</div>
+        <div id="profile-page" class="px-3">
+            <div class="text-center mb-4">
+                <img id="p-img" src="" style="width:100px; height:100px; border-radius:25px; object-fit:cover; border:4px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+                <input type="file" id="input-foto" style="display:none" onchange="uploadFotoProfil(this)">
+                <button class="btn btn-primary btn-sm d-block mx-auto mt-2 rounded-pill" onclick="document.getElementById('input-foto').click()">Ganti Foto</button>
+            </div>
+            <div class="bg-white p-3 rounded-4 shadow-sm mb-3 border">
+                <label class="text-muted small fw-bold">NAMA LENGKAP</label>
+                <input type="text" id="edit-nama" class="form-control border-0 bg-light mb-2 p-2 rounded-3 small fw-bold">
+                <label class="text-muted small fw-bold">JABATAN</label>
+                <input type="text" id="edit-jabatan" class="form-control border-0 bg-light mb-3 p-2 rounded-3 small">
+                <button class="btn btn-primary w-100 rounded-pill fw-bold mb-2 shadow-sm" onclick="updateProfile()">SIMPAN PERUBAHAN</button>
+                <button class="btn btn-outline-danger w-100 rounded-pill fw-bold" onclick="logout()">LOGOUT AKUN</button>
+            </div>
+            <button class="btn btn-light w-100 rounded-pill fw-bold border" onclick="showScreen('main-app')">KEMBALI</button>
+        </div>
 
-<div class="camera-box">
-<video id="video" autoplay playsinline></video>
-</div>
+        <div id="login-screen" class="px-4 py-5">
+            <div class="text-center mb-4"><i class="fas fa-user-shield text-primary" style="font-size: 3rem;"></i></div>
+            <h4 class="fw-bold text-center mb-4">Login Ke Sistem</h4>
+            <input type="text" id="login-user" class="form-control mb-3 p-3 rounded-pill border-0 bg-light shadow-sm" placeholder="Username">
+            <div class="pass-container mb-4">
+                <input type="password" id="login-pass" class="form-control p-3 rounded-pill border-0 bg-light shadow-sm" placeholder="Password">
+                <i class="fas fa-eye toggle-pass" onclick="togglePass('login-pass', this)"></i>
+            </div>
+            <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow" onclick="handleLogin()">MASUK SEKARANG</button>
+            <p class="mt-4 text-center small text-muted">Belum terdaftar? <a href="#" onclick="showScreen('register-screen')" class="fw-bold text-decoration-none">Daftar Akun</a></p>
+        </div>
 
-<div class="row g-2">
-<div class="col-6">
-<button id="btn-masuk" class="cool-btn btn-masuk w-100" onclick="takeAbsen('Masuk')">MASUK</button>
-</div>
-<div class="col-6">
-<button id="btn-izin" class="cool-btn btn-izin w-100" onclick="takeIzin()">IZIN</button>
-</div>
-</div>
+        <div id="register-screen" class="px-4 py-5">
+            <h4 class="fw-bold text-center mb-4">Registrasi Guru</h4>
+            <input type="text" id="reg-nama" class="form-control mb-3 p-3 rounded-4 bg-light border-0" placeholder="Nama Lengkap">
+            <input type="text" id="reg-user" class="form-control mb-3 p-3 rounded-4 bg-light border-0" placeholder="Username (Untuk Login)">
+            <div class="pass-container mb-4">
+                <input type="password" id="reg-pass" class="form-control p-3 rounded-4 bg-light border-0" placeholder="Password">
+                <i class="fas fa-eye toggle-pass" onclick="togglePass('reg-pass', this)"></i>
+            </div>
+            <button class="btn btn-dark w-100 py-3 rounded-pill fw-bold" onclick="handleRegister()">DAFTAR SEKARANG</button>
+            <button class="btn btn-link w-100 mt-2 text-muted text-decoration-none small" onclick="showScreen('login-screen')">Kembali ke Login</button>
+        </div>
+    </div>
 
-<div class="mt-auto">
-<button id="btn-pulang" class="cool-btn btn-pulang w-100 mt-3" onclick="takeAbsen('Pulang')">ABSEN PULANG</button>
-<p id="lock-msg" class="text-center text-muted small mt-2"></p>
-</div>
+    <canvas id="canvas" style="display:none;"></canvas>
 
-</div>
+    <script>
+        const SUPABASE_URL = 'https://dddbjqnoovjbdesvaulo.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkZGJqcW5vb3ZqYmRlc3ZhdWxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNDAzMTUsImV4cCI6MjA5MDYxNjMxNX0.yLeBX4C8bwpCngvOViMR-eocHVFjv0BXXBuPJWwb9KU';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-<!-- ADMIN PANEL -->
-<div id="admin-panel">
+        const SCHOOL_LAT = -6.250736361618612,
+            SCHOOL_LON = 106.46656879999998,
+            MAX_DISTANCE = 50;
+        let currentUser = "",
+            userData = null;
 
-<h6 class="fw-bold mb-3">MONITORING GURU</h6>
+        window.onload = () => {
+            updateClock();
+            setInterval(updateClock, 1000);
+            loadSchoolData();
+            checkAutoLogin();
+        };
 
-<div class="bg-light p-3 rounded-3 mb-3">
-<label class="fw-bold small">BATAS JAM PULANG</label>
-<div class="d-flex gap-2">
-<input type="time" id="set-jam-mulai" class="form-control form-control-sm">
-<input type="time" id="set-jam-selesai" class="form-control form-control-sm">
-<button class="btn btn-primary btn-sm" onclick="updateJamPulang()">Simpan</button>
-</div>
-</div>
+        function togglePass(id, el) {
+            const input = document.getElementById(id);
+            if (input.type === 'password') {
+                input.type = 'text';
+                el.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                el.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
 
-<div id="admin-stats" class="fw-bold small mb-3"></div>
-<div id="list-admin-view"></div>
+        async function checkAutoLogin() {
+            const u = localStorage.getItem('guru_user'),
+                p = localStorage.getItem('guru_pass');
+            if (u && p) {
+                const { data: adm } = await _supabase.from('admin_users').select('*').eq('username', u).eq('password', p).single();
+                if (adm) {
+                    showScreen('admin-panel');
+                    loadAdminDashboard();
+                } else {
+                    const { data: guru } = await _supabase.from('profil_guru').select('*').eq('username', u).eq('password', p).single();
+                    if (guru) processLogin(guru);
+                    else showScreen('login-screen');
+                }
+            } else showScreen('login-screen');
+        }
 
-<button class="btn btn-danger w-100 mt-3" onclick="logout()">LOGOUT</button>
+        async function handleLogin() {
+            const u = document.getElementById('login-user').value,
+                p = document.getElementById('login-pass').value;
+            const { data: adm } = await _supabase.from('admin_users').select('*').eq('username', u).eq('password', p).single();
+            if (adm) {
+                localStorage.setItem('guru_user', u);
+                localStorage.setItem('guru_pass', p);
+                showScreen('admin-panel');
+                loadAdminDashboard();
+                return;
+            }
+            const { data: guru } = await _supabase.from('profil_guru').select('*').eq('username', u).eq('password', p).single();
+            if (guru) {
+                localStorage.setItem('guru_user', u);
+                localStorage.setItem('guru_pass', p);
+                processLogin(guru);
+            } else alert("Login Gagal! Periksa kembali Username/Password.");
+        }
 
-</div>
+        function processLogin(data) {
+            currentUser = data.username;
+            userData = data;
+            document.getElementById('user-display').innerText = data.nama_lengkap;
+            document.getElementById('mini-avatar').src = data.foto_avatar || `https://ui-avatars.com/api/?name=${data.nama_lengkap}`;
+            document.getElementById('edit-nama').value = data.nama_lengkap;
+            document.getElementById('edit-jabatan').value = data.jabatan || "";
+            showScreen('main-app');
+            startCamera();
+            checkTodayPresence();
+        }
 
-<!-- PROFILE -->
-<div id="profile-page">
+        async function takeAbsen(tipe) {
+            const now = new Date();
+            const h = now.getHours();
+            if (tipe === 'Pulang' && (h < 14 || h >= 17)) return alert("Absen pulang hanya dibuka pukul 14:00 - 17:00!");
 
-<h6 class="fw-bold mb-3">Profil Guru</h6>
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const uLat = pos.coords.latitude,
+                    uLon = pos.coords.longitude;
+                const R = 6371e3;
+                const dLat = (SCHOOL_LAT - uLat) * Math.PI / 180;
+                const dLon = (SCHOOL_LON - uLon) * Math.PI / 180;
+                const a = Math.sin(dLat / 2) ** 2 + Math.cos(uLat * Math.PI / 180) * Math.cos(SCHOOL_LAT * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+                const jarak = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                if (jarak > MAX_DISTANCE) return alert(`Jarak: ${Math.round(jarak)}m. Anda diluar jangkauan sekolah!`);
 
-<input type="text" id="edit-nama" class="form-control mb-2">
-<input type="text" id="edit-jabatan" class="form-control mb-3">
-<button class="btn btn-primary w-100 mb-3" onclick="updateProfile()">SIMPAN</button>
+                const cvs = document.getElementById('canvas');
+                cvs.width = 400;
+                cvs.height = 400;
+                const ctx = cvs.getContext('2d');
+                ctx.translate(400, 0);
+                ctx.scale(-1, 1);
+                ctx.drawImage(document.getElementById('video'), 0, 0, 400, 400);
+                const img = cvs.toDataURL('image/webp', 0.5);
+                const ket = (tipe === 'Masuk' && (h > 7 || (h === 7 && now.getMinutes() > 0))) ? "Terlambat" : "Tepat Waktu";
 
-<div class="bg-light p-3 rounded-3 mb-3">
-<h6 class="fw-bold small">RIWAYAT PRESENSI</h6>
-<div id="history-presensi" style="max-height:150px;overflow:auto;font-size:0.8rem;"></div>
-</div>
+                await _supabase.from('presensi').insert([{
+                    nama_guru: currentUser,
+                    tipe,
+                    keterangan: ket,
+                    foto: img,
+                    latitude: uLat,
+                    longitude: uLon
+                }]);
+                alert("Presensi Berhasil!");
+                checkTodayPresence();
+            }, () => alert("Gagal! Aktifkan GPS dan berikan izin lokasi."), {
+                enableHighAccuracy: true
+            });
+        }
 
-<button class="btn btn-secondary w-100" onclick="showScreen('main-app')">KEMBALI</button>
+        async function takeIzin() {
+            const al = prompt("Masukkan alasan (Sakit/Izin/Dinas):", "Sakit");
+            if (!al) return;
+            await _supabase.from('presensi').insert([{
+                nama_guru: currentUser,
+                tipe: 'Izin',
+                keterangan: al
+            }]);
+            alert("Izin Terkirim!");
+            checkTodayPresence();
+        }
 
-</div>
+        async function checkTodayPresence() {
+            const tgl = new Date().toISOString().split('T')[0];
+            const { data } = await _supabase.from('presensi').select('tipe').eq('nama_guru', currentUser).gte('created_at', tgl);
+            if (data.some(d => d.tipe === 'Masuk' || d.tipe === 'Izin')) {
+                ['btn-masuk', 'btn-izin'].forEach(id => {
+                    let b = document.getElementById(id);
+                    b.classList.add('btn-disabled');
+                    b.onclick = null;
+                });
+            }
+            if (data.some(d => d.tipe === 'Pulang')) {
+                let b = document.getElementById('btn-pulang');
+                b.classList.add('btn-disabled');
+                b.onclick = null;
+            }
+        }
 
-<!-- LOGIN -->
-<div id="login-screen">
-<h4 class="fw-bold text-center mb-4">Login</h4>
-<input type="text" id="login-user" class="form-control mb-3" placeholder="Username">
-<input type="password" id="login-pass" class="form-control mb-3" placeholder="Password">
-<button class="btn btn-primary w-100" onclick="handleLogin()">LOGIN</button>
-</div>
+        async function loadAdminDashboard() {
+            const tgl = new Date().toISOString().split('T')[0];
+            const { data: gurus } = await _supabase.from('profil_guru').select('*').order('nama_lengkap');
+            const { data: pres } = await _supabase.from('presensi').select('*').gte('created_at', tgl);
 
-</div>
+            let sudah = 0;
+            document.getElementById('list-admin-view').innerHTML = gurus.map(g => {
+                const pM = pres.find(x => x.nama_guru === g.username && (x.tipe === 'Masuk' || x.tipe === 'Izin'));
+                const pP = pres.find(x => x.nama_guru === g.username && x.tipe === 'Pulang');
 
-<canvas id="canvas" style="display:none;"></canvas>
+                if (pM) sudah++;
 
-<script>
-const SUPABASE_URL='https://dddbjqnoovjbdesvaulo.supabase.co';
-const SUPABASE_KEY='YOUR_KEY';
-const _supabase=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+                const mTime = pM ? new Date(pM.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+                const pTime = pP ? new Date(pP.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+                const mColor = (pM && pM.keterangan === 'Terlambat') ? 'text-danger' : (pM ? 'text-success' : 'text-muted');
+                const mLabel = pM ? pM.keterangan : "Belum Absen";
 
-let currentUser="",userData=null;
-let JAM_MULAI="14:00";
-let JAM_SELESAI="17:00";
+                return `
+                <div class="user-card" style="${!pM ? 'opacity: 0.7; border-left: 4px solid #cbd5e1;' : 'border-left: 4px solid #6366f1;'}">
+                    <img src="${g.foto_avatar || 'https://ui-avatars.com/api/?name='+g.nama_lengkap}" style="width:40px; height:40px; border-radius:12px; margin-right:10px; object-fit:cover;">
+                    <div style="flex:1">
+                        <div class="fw-bold small d-flex justify-content-between">
+                            <span>${g.nama_lengkap}</span>
+                            <span style="font-size: 0.6rem;" class="${mColor}">${mLabel}</span>
+                        </div>
+                        <div style="font-size:0.65rem">
+                            M: <b class="${mColor}">${mTime}</b> ${pM && pM.foto ? `<img src="${pM.foto}" class="admin-thumb ms-1" onclick="viewPhoto('${pM.foto}', 'M: ${g.nama_lengkap}')">` : ''} 
+                            | P: <b class="${pP ? 'text-success':'text-muted'}">${pTime}</b> ${pP ? `<img src="${pP.foto}" class="admin-thumb ms-1" onclick="viewPhoto('${pP.foto}', 'P: ${g.nama_lengkap}')">` : ''}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
 
-window.onload=()=>{
-updateClock();
-setInterval(updateClock,1000);
-checkAutoLogin();
-};
+            document.getElementById('admin-stats').innerText = `TOTAL GURU: ${gurus.length} | SUDAH ABSEN: ${sudah}`;
+        }
 
-function showScreen(id){
-['login-screen','main-app','admin-panel','profile-page'].forEach(s=>{
-document.getElementById(s).style.display=(s===id)?'block':'none';
-});
-}
+        async function exportDataHorizontal() {
+            const tgl = new Date().toISOString().split('T')[0];
+            const { data: gurus } = await _supabase.from('profil_guru').select('username, nama_lengkap');
+            const { data: presensi } = await _supabase.from('presensi').select('*').gte('created_at', tgl);
+            const rekap = gurus.map(g => {
+                const m = presensi.find(p => p.nama_guru === g.username && (p.tipe === 'Masuk' || p.tipe === 'Izin'));
+                const p = presensi.find(p => p.nama_guru === g.username && p.tipe === 'Pulang');
+                return {
+                    "NAMA GURU": g.nama_lengkap,
+                    "STATUS MASUK": m ? m.keterangan : "Alfa",
+                    "JAM MASUK": m ? new Date(m.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : "--:--",
+                    "STATUS PULANG": p ? "Sudah Pulang" : "Belum Absen",
+                    "JAM PULANG": p ? new Date(p.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : "--:--"
+                };
+            });
+            const ws = XLSX.utils.json_to_sheet(rekap);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Rekap");
+            XLSX.writeFile(wb, `Presensi_${tgl}.xlsx`);
+        }
 
-async function handleLogin(){
-const u=document.getElementById('login-user').value;
-const p=document.getElementById('login-pass').value;
-const {data}=await _supabase.from('profil_guru').select('*').eq('username',u).eq('password',p).single();
-if(data){
-currentUser=data.username;
-userData=data;
-document.getElementById('user-display').innerText=data.nama_lengkap;
-showScreen('main-app');
-startCamera();
-}else alert("Login gagal");
-}
+        function viewPhoto(img, title) {
+            document.getElementById('modal-img').src = img;
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('photo-modal').style.display = 'flex';
+        }
 
-function updateClock(){
-const n=new Date();
-document.getElementById('clock').innerText=n.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
-document.getElementById('date').innerText=n.toLocaleDateString('id-ID');
-const nowStr=n.toTimeString().slice(0,5);
-if(nowStr>=JAM_MULAI && nowStr<=JAM_SELESAI){
-document.getElementById('btn-pulang').classList.remove('btn-disabled');
-document.getElementById('lock-msg').innerText="";
-}else{
-document.getElementById('btn-pulang').classList.add('btn-disabled');
-document.getElementById('lock-msg').innerText="Aktif: "+JAM_MULAI+" - "+JAM_SELESAI;
-}
-}
+        function showScreen(id) {
+            ['login-screen', 'register-screen', 'main-app', 'admin-panel', 'profile-page'].forEach(s => document.getElementById(s).style.display = (s === id) ? 'block' : 'none');
+        }
 
-async function takeAbsen(tipe){
-const now=new Date();
-const nowStr=now.toTimeString().slice(0,5);
-if(tipe==="Pulang" && (nowStr<JAM_MULAI || nowStr>JAM_SELESAI)){
-alert("Diluar jam pulang");
-return;
-}
-await _supabase.from('presensi').insert([{nama_guru:currentUser,tipe}]);
-alert("Berhasil");
-}
+        function updateClock() {
+            const n = new Date();
+            const h = n.getHours();
+            document.getElementById('clock').innerText = n.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('date').innerText = n.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' });
+            const btnP = document.getElementById('btn-pulang');
+            const msg = document.getElementById('lock-msg');
+            if (h >= 14 && h < 17) {
+                btnP.classList.remove('btn-disabled');
+                msg.classList.add('d-none');
+            } else {
+                btnP.classList.add('btn-disabled');
+                msg.classList.remove('d-none');
+            }
+        }
 
-async function takeIzin(){
-await _supabase.from('presensi').insert([{nama_guru:currentUser,tipe:"Izin"}]);
-alert("Izin terkirim");
-}
+        async function updateProfile() {
+            const n = document.getElementById('edit-nama').value,
+                j = document.getElementById('edit-jabatan').value;
+            await _supabase.from('profil_guru').update({ nama_lengkap: n, jabatan: j }).eq('username', currentUser);
+            alert("Profil diperbarui!");
+            location.reload();
+        }
 
-async function loadAdminDashboard(){
-const {data:guru}=await _supabase.from('profil_guru').select('*');
-document.getElementById('admin-stats').innerText="Total Guru: "+guru.length;
-document.getElementById('list-admin-view').innerHTML=
-guru.map(g=>`<div class="user-card"><b>${g.nama_lengkap}</b></div>`).join('');
-}
+        function startCamera() {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+                .then(s => document.getElementById('video').srcObject = s)
+                .catch(e => console.log(e));
+        }
 
-async function updateJamPulang(){
-JAM_MULAI=document.getElementById('set-jam-mulai').value;
-JAM_SELESAI=document.getElementById('set-jam-selesai').value;
-alert("Jam diperbarui");
-}
+        function logout() {
+            localStorage.clear();
+            location.reload();
+        }
 
-async function updateProfile(){
-await _supabase.from('profil_guru')
-.update({nama_lengkap:document.getElementById('edit-nama').value})
-.eq('username',currentUser);
-alert("Updated");
-}
+        async function handleRegister() {
+            const n = document.getElementById('reg-nama').value,
+                u = document.getElementById('reg-user').value,
+                p = document.getElementById('reg-pass').value;
+            if (!u || !p) return alert("Lengkapi data!");
+            await _supabase.from('profil_guru').insert([{ username: u, password: p, nama_lengkap: n }]);
+            alert("Registrasi Berhasil!");
+            showScreen('login-screen');
+        }
 
-async function loadHistory(){
-const {data}=await _supabase.from('presensi')
-.select('*')
-.eq('nama_guru',currentUser)
-.order('created_at',{ascending:false})
-.limit(7);
-document.getElementById('history-presensi').innerHTML=
-data.map(d=>`<div>${d.tipe} - ${new Date(d.created_at).toLocaleDateString('id-ID')}</div>`).join('');
-}
+        async function loadSchoolData() {
+            const { data } = await _supabase.from('pengaturan').select('*').eq('id', 1).single();
+            if (data) document.getElementById('school-name').innerText = data.nama_sekolah;
+        }
 
-function startCamera(){
-navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}})
-.then(s=>document.getElementById('video').srcObject=s);
-}
+        async function showProfile() {
+            showScreen('profile-page');
+            document.getElementById('p-img').src = userData.foto_avatar || `https://ui-avatars.com/api/?name=${userData.nama_lengkap}`;
+        }
 
-function logout(){
-location.reload();
-}
-</script>
-
+        async function uploadFotoProfil(input) {
+            const f = input.files[0],
+                r = new FileReader();
+            r.onload = async (e) => {
+                const b64 = e.target.result;
+                await _supabase.from('profil_guru').update({ foto_avatar: b64 }).eq('username', currentUser);
+                location.reload();
+            };
+            r.readAsDataURL(f);
+        }
+    </script>
 </body>
+
 </html>
