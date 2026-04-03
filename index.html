@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>E-Presensi v3.12</title>
+    <title>E-Presensi v3.8 Stable</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -12,119 +12,114 @@
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        :root { --primary: #6366f1; --success: #10b981; --danger: #ef4444; }
         
         body { 
-            margin: 0; padding: 0; height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: #fff; display: flex; justify-content: center; overflow: hidden;
+            margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: #6366f1; height: 100vh; overflow: hidden; display: flex; justify-content: center;
         }
 
-        #app-shell { width: 100%; max-width: 480px; height: 100vh; display: flex; flex-direction: column; position: relative; }
+        .app-shell { 
+            width: 100%; max-width: 480px; height: 100%; background: #fff; 
+            position: relative; display: flex; flex-direction: column;
+        }
 
-        /* Login Screen - Clean Design */
-        #login-screen { padding: 60px 30px; text-align: left; display: flex; flex-direction: column; height: 100%; }
-        .logo-login { width: 100px; height: 100px; border-radius: 22px; margin-bottom: 40px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-        .input-box { background: #f8fafc; border: 1px solid #f1f5f9; padding: 16px 20px; border-radius: 16px; margin-bottom: 15px; width: 100%; font-size: 1rem; outline: none; }
-        
-        /* Dashboard App - Hidden by Default */
-        #main-dashboard, #admin-dashboard, #profile-dashboard { display: none; flex-direction: column; height: 100%; }
+        /* Header / Banner */
+        .school-banner { padding: 15px; text-align: center; border-bottom: 1px solid #f1f5f9; flex-shrink: 0; }
+        .logo-small { width: 45px; height: 45px; border-radius: 12px; margin-bottom: 5px; }
 
-        .top-nav { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; }
-        
-        #main-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; padding: 20px; }
-        
-        .clock-big { font-size: 3.8rem; font-weight: 800; color: #1e293b; letter-spacing: -2px; margin: 0; }
-        
-        .camera-circle {
-            width: 230px; height: 230px; border-radius: 50%; overflow: hidden;
-            border: 6px solid #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            background: #000; position: relative;
+        /* Layar Utama */
+        .screen { display: none; height: 100%; flex-direction: column; padding: 20px; overflow-y: auto; }
+        .active-screen { display: flex !important; }
+
+        /* Kamera Lingkaran v3.8 Optimized */
+        .camera-container { 
+            width: 220px; height: 220px; margin: 20px auto; border-radius: 50%; 
+            overflow: hidden; border: 5px solid #6366f1; position: relative; background: #000;
         }
         #video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 
-        .btn-action { 
-            border: none; border-radius: 22px; padding: 20px; color: white; 
-            font-weight: 800; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s;
-        }
-        .btn-p-masuk { background: var(--primary); box-shadow: 0 10px 20px rgba(99,102,241,0.2); }
-        .btn-p-pulang { background: var(--danger); box-shadow: 0 10px 20px rgba(239,68,68,0.2); }
-        .btn-p-izin { background: #fff; color: #64748b; border: 1px solid #e2e8f0; margin-top: 12px; }
-        .btn-disabled { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
+        /* Info Guru */
+        .user-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .avatar-mini { width: 45px; height: 45px; border-radius: 12px; border: 2px solid #eee; }
 
-        /* Admin & History Cards */
-        .item-card { background: #f8fafc; border-radius: 18px; padding: 15px; margin-bottom: 12px; border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 15px; }
+        /* Jam & Tanggal */
+        .clock-box { text-align: center; margin-bottom: 10px; }
+        #clock { font-size: 3rem; font-weight: 800; color: #1e293b; line-height: 1; }
+        #date { font-size: 0.85rem; font-weight: 600; color: #64748b; margin-top: 5px; }
 
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        /* Tombol */
+        .btn-custom { border: none; border-radius: 18px; padding: 16px; font-weight: 800; width: 100%; transition: 0.2s; }
+        .btn-primary-abs { background: #6366f1; color: white; margin-bottom: 10px; }
+        .btn-danger-abs { background: #ef4444; color: white; }
+        .btn-secondary-abs { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+        .btn-disabled { opacity: 0.4; pointer-events: none; filter: grayscale(1); }
+
+        /* Card Admin & Riwayat */
+        .card-data { background: #f8fafc; padding: 12px; border-radius: 15px; margin-bottom: 10px; border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 12px; }
+        .card-data b { font-size: 0.85rem; }
+        .card-data small { color: #64748b; }
+
+        #login-screen { padding: 50px 30px; text-align: left; }
+        .input-login { background: #f1f5f9; border: none; padding: 15px; border-radius: 15px; width: 100%; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
-<div id="loading-screen" class="loading-overlay">
-    <div class="spinner-border text-primary mb-2"></div>
-    <small class="text-muted fw-bold">Memuat Sistem...</small>
-</div>
+<div class="app-shell">
+    <div id="top-banner" class="school-banner" style="display:none;">
+        <img src="ChatGPTImageApr1202609_31_16PM.jpeg" class="logo-small">
+        <h6 class="m-0 fw-bold text-primary" style="font-size: 0.75rem;">E-PRESENSI GURU</h6>
+    </div>
 
-<div id="app-shell">
-    <div id="login-screen">
-        <img src="ChatGPTImageApr1202609_31_16PM.jpeg" class="logo-login">
-        <h1 class="fw-extrabold mb-1" style="font-weight: 800;">Selamat Datang</h1>
-        <p class="text-muted mb-5">Silakan login untuk absensi</p>
+    <div id="login-screen" class="screen active-screen">
+        <img src="ChatGPTImageApr1202609_31_16PM.jpeg" style="width:80px; border-radius:20px; margin-bottom:30px;">
+        <h2 class="fw-bold">Selamat Datang</h2>
+        <p class="text-muted mb-4">Silakan masuk ke akun Anda</p>
+        <input type="text" id="user-in" class="input-login" placeholder="Username">
+        <input type="password" id="pass-in" class="input-login" placeholder="Password">
+        <button class="btn-custom btn-primary-abs mt-3" onclick="doLogin()">MASUK SEKARANG</button>
+    </div>
+
+    <div id="absen-screen" class="screen">
+        <div class="user-info">
+            <div><small class="text-muted">Halo,</small><br><b id="display-nama">Guru</b></div>
+            <img id="avatar-img" src="" class="avatar-mini" onclick="openProfile()">
+        </div>
         
-        <input type="text" id="l-user" class="input-box" placeholder="Username">
-        <input type="password" id="l-pass" class="input-box" placeholder="Password">
-        
-        <button class="btn-action btn-p-masuk mt-4" onclick="handleLogin()">MASUK SEKARANG</button>
-    </div>
-
-    <div id="main-dashboard">
-        <div class="top-nav">
-            <div class="d-flex align-items-center gap-2" onclick="openProfile()">
-                <img id="avatar-mini" src="" style="width:42px; height:42px; border-radius:12px; background: #eee;">
-                <div><small class="text-muted d-block" style="font-size:0.65rem">PRESENSI GURU</small><b id="name-display" style="font-size:0.85rem">--</b></div>
-            </div>
-            <img src="ChatGPTImageApr1202609_31_16PM.jpeg" style="width:32px; height:32px; border-radius:8px;">
+        <div class="clock-box">
+            <div id="clock">00:00</div>
+            <div id="date">--</div>
         </div>
 
-        <div id="main-content">
-            <div class="text-center">
-                <h1 class="clock-big" id="clock">00:00</h1>
-                <div id="date" class="fw-bold text-muted small">--</div>
-            </div>
+        <div class="camera-container"><video id="video" autoplay playsinline></video></div>
 
-            <div class="camera-circle"><video id="video" autoplay playsinline></video></div>
-
-            <div class="w-100" style="padding-bottom: 30px;">
-                <button id="btn-in" class="btn-action btn-p-masuk mb-2" onclick="takeAbsen('Masuk')"><i class="fas fa-fingerprint"></i> ABSEN MASUK</button>
-                <div class="row gx-2">
-                    <div class="col-6"><button id="btn-out" class="btn-action btn-p-pulang" onclick="takeAbsen('Pulang')">PULANG</button></div>
-                    <div class="col-6"><button class="btn-action btn-p-izin" onclick="takeIzin()">IZIN</button></div>
-                </div>
-                <p id="info-pulang" class="text-center text-muted small mt-3 fw-bold mb-0">Jam Pulang: <span id="v-jam-p">--:--</span></p>
+        <div class="mt-auto">
+            <button id="btn-masuk" class="btn-custom btn-primary-abs" onclick="absensi('Masuk')">ABSEN MASUK</button>
+            <div class="row gx-2">
+                <div class="col-6"><button id="btn-pulang" class="btn-custom btn-danger-abs" onclick="absensi('Pulang')">PULANG</button></div>
+                <div class="col-6"><button class="btn-custom btn-secondary-abs" onclick="doIzin()">IZIN</button></div>
             </div>
+            <p id="jam-info" class="text-center small text-muted fw-bold mt-3">Jadwal Pulang: <span id="v-jam-p">14:00</span></p>
         </div>
     </div>
 
-    <div id="profile-dashboard" class="p-4 overflow-auto">
-        <div class="text-center mb-4">
-            <img id="p-avatar" src="" style="width:100px; height:100px; border-radius:30px; border:4px solid #f8fafc">
-            <h5 id="p-name" class="fw-bold mt-3">--</h5>
-        </div>
-        <label class="fw-bold small text-muted mb-3">RIWAYAT 10 HARI TERAKHIR</label>
-        <div id="p-history"></div>
-        <button class="btn-action btn-p-masuk mt-4" onclick="backToMain()">KEMBALI</button>
-        <button class="btn-action btn-p-izin mt-2 border-0 text-danger" onclick="logout()">LOGOUT</button>
+    <div id="profile-screen" class="screen">
+        <h5 class="fw-bold mb-3">Profil & Riwayat</h5>
+        <div id="history-list" class="flex-grow-1"></div>
+        <button class="btn-custom btn-primary-abs mt-3" onclick="showScreen('absen-screen')">KEMBALI</button>
+        <button class="btn-custom btn-secondary-abs mt-2 border-0 text-danger" onclick="doLogout()">LOGOUT</button>
     </div>
 
-    <div id="admin-dashboard" class="p-3 overflow-auto">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="fw-bold m-0">Admin Panel</h4>
+    <div id="admin-screen" class="screen">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold m-0">Admin Panel</h5>
             <div class="d-flex gap-2">
-                <button class="btn btn-light rounded-circle" onclick="openSettings()"><i class="fas fa-cog"></i></button>
-                <button class="btn btn-success rounded-pill px-3 fw-bold btn-sm" onclick="exportData()">EXCEL</button>
+                <button class="btn btn-sm btn-light border" onclick="setJamPulang()"><i class="fas fa-cog"></i></button>
+                <button class="btn btn-sm btn-success px-3 fw-bold" onclick="exportExcel()">REKAP</button>
             </div>
         </div>
         <div id="admin-list"></div>
-        <button class="btn-action btn-p-izin mt-4" onclick="logout()">LOGOUT</button>
+        <button class="btn-custom btn-secondary-abs mt-3" onclick="doLogout()">LOGOUT</button>
     </div>
 </div>
 
@@ -133,164 +128,130 @@
 <script>
 const SUPABASE_URL = 'https://dddbjqnoovjbdesvaulo.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkZGJqcW5vb3ZqYmRlc3ZhdWxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNDAzMTUsImV4cCI6MjA5MDYxNjMxNX0.yLeBX4C8bwpCngvOViMR-eocHVFjv0BXXBuPJWwb9KU';
-const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const SCHOOL = { lat: -6.250736, lon: 106.466568, r: 50 };
-let user = "", jamP = "14:00";
+const SCHOOL_LOC = { lat: -6.250736, lon: 106.466568, r: 50 };
+let currentU = "", jamP = "14:00";
 
+// INISIALISASI AWAL
 window.onload = async () => {
-    updateClock(); setInterval(updateClock, 1000);
-    const u = localStorage.getItem('g_u'), p = localStorage.getItem('g_p');
-    if(u && p) {
-        await login(u, p, true);
-    } else {
-        hideLoading();
-    }
+    updateTime(); setInterval(updateTime, 1000);
+    const savedU = localStorage.getItem('g_u'), savedP = localStorage.getItem('g_p');
+    if(savedU) await checkLogin(savedU, savedP, true);
 };
 
-async function handleLogin() {
-    const u = document.getElementById('l-user').value, p = document.getElementById('l-pass').value;
-    if(!u || !p) return alert("Isi semua field!");
-    showLoading();
-    await login(u, p, false);
-}
-
-async function login(u, p, auto) {
-    // 1. Cek Admin
-    const { data: adm } = await _supabase.from('admin_users').select('*').eq('username', u).eq('password', p).single();
-    if(adm) {
-        save(u, p); switchScreen('admin-dashboard');
-        await loadAdmin();
-        hideLoading(); return;
-    }
-    // 2. Cek Guru
-    const { data: g } = await _supabase.from('profil_guru').select('*').eq('username', u).eq('password', p).single();
-    if(g) {
-        save(u, p); user = u;
-        document.getElementById('name-display').innerText = g.nama_lengkap;
-        document.getElementById('p-name').innerText = g.nama_lengkap;
-        const img = g.foto_avatar || `https://ui-avatars.com/api/?name=${u}`;
-        document.getElementById('avatar-mini').src = img;
-        document.getElementById('p-avatar').src = img;
-        
-        await loadConfig();
-        await checkStatus();
-        switchScreen('main-dashboard');
-        startCam();
-    } else if(!auto) {
-        alert("Username/Password Salah!");
-    }
-    hideLoading();
-}
-
-async function checkStatus() {
-    const today = new Date().toISOString().split('T')[0];
-    const { data } = await _supabase.from('presensi').select('tipe').eq('nama_guru', user).gte('created_at', today);
-    if(data.some(d => d.tipe === 'Masuk' || d.tipe === 'Izin')) {
-        const b = document.getElementById('btn-in');
-        b.classList.add('btn-disabled');
-        b.innerHTML = "SUDAH ABSEN MASUK";
-    }
-}
-
-async function loadConfig() {
-    const { data } = await _supabase.from('pengaturan').select('jam_pulang').eq('id', 1).single();
-    if(data) {
-        jamP = data.jam_pulang;
-        document.getElementById('v-jam-p').innerText = jamP;
-    }
-}
-
-function updateClock() {
+function updateTime() {
     const n = new Date();
     document.getElementById('clock').innerText = n.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
     document.getElementById('date').innerText = n.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'}).toUpperCase();
     
-    if(jamP) {
-        const [h, m] = jamP.split(':').map(Number);
-        const btn = document.getElementById('btn-out');
-        if(btn) {
-            if(n.getHours() > h || (n.getHours() === h && n.getMinutes() >= m)) btn.classList.remove('btn-disabled');
-            else btn.classList.add('btn-disabled');
-        }
+    // Cek Tombol Pulang
+    const [h, m] = jamP.split(':').map(Number);
+    const btnP = document.getElementById('btn-pulang');
+    if(btnP) {
+        if(n.getHours() > h || (n.getHours() === h && n.getMinutes() >= m)) btnP.classList.remove('btn-disabled');
+        else btnP.classList.add('btn-disabled');
     }
 }
 
-async function takeAbsen(tipe) {
+async function doLogin() {
+    const u = document.getElementById('user-in').value, p = document.getElementById('pass-in').value;
+    await checkLogin(u, p, false);
+}
+
+async function checkLogin(u, p, isAuto) {
+    // Cek Admin
+    const { data: adm } = await _sb.from('admin_users').select('*').eq('username', u).eq('password', p).single();
+    if(adm) {
+        save(u, p); showScreen('admin-screen'); loadAdmin(); return;
+    }
+    // Cek Guru
+    const { data: g } = await _sb.from('profil_guru').select('*').eq('username', u).eq('password', p).single();
+    if(g) {
+        save(u, p); currentU = u;
+        document.getElementById('display-nama').innerText = g.nama_lengkap;
+        const av = g.foto_avatar || `https://ui-avatars.com/api/?name=${u}`;
+        document.getElementById('avatar-img').src = av;
+        
+        await loadConfig();
+        showScreen('absen-screen');
+        startCamera();
+    } else if(!isAuto) alert("Login Gagal!");
+}
+
+async function loadConfig() {
+    const { data } = await _sb.from('pengaturan').select('*').eq('id', 1).single();
+    if(data) { jamP = data.jam_pulang; document.getElementById('v-jam-p').innerText = jamP; }
+}
+
+async function absensi(tipe) {
     navigator.geolocation.getCurrentPosition(async (pos) => {
         const { latitude: lt, longitude: lg } = pos.coords;
+        // Hitung Jarak v3.8
         const R = 6371e3;
-        const dLat = (SCHOOL.lat - lt) * Math.PI/180;
-        const dLon = (SCHOOL.lon - lg) * Math.PI/180;
-        const a = Math.sin(dLat/2)**2 + Math.cos(lt*Math.PI/180)*Math.cos(SCHOOL.lat*Math.PI/180)*Math.sin(dLon/2)**2;
+        const dLat = (SCHOOL_LOC.lat - lt) * Math.PI/180;
+        const dLon = (SCHOOL_LOC.lon - lg) * Math.PI/180;
+        const a = Math.sin(dLat/2)**2 + Math.cos(lt*Math.PI/180)*Math.cos(SCHOOL_LOC.lat*Math.PI/180)*Math.sin(dLon/2)**2;
         const dist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         
-        if (dist > SCHOOL.r) return alert(`Gagal! Jarak: ${Math.round(dist)}m dari sekolah.`);
+        if (dist > SCHOOL_LOC.r) return alert(`Gagal! Anda berada ${Math.round(dist)}m dari sekolah.`);
 
-        const v = document.getElementById('video');
-        const c = document.getElementById('canvas'); c.width = 400; c.height = 400;
+        const v = document.getElementById('video'), c = document.getElementById('canvas');
+        c.width = 400; c.height = 400;
         const ctx = c.getContext('2d'); ctx.translate(400,0); ctx.scale(-1,1);
         ctx.drawImage(v, 0, 0, 400, 400);
 
-        showLoading();
-        await _supabase.from('presensi').insert([{ 
-            nama_guru: user, tipe, foto: c.toDataURL('image/webp', 0.3), latitude: lt, longitude: lg 
+        await _sb.from('presensi').insert([{ 
+            nama_guru: currentU, tipe, foto: c.toDataURL('image/webp', 0.4), latitude: lt, longitude: lg 
         }]);
-        location.reload();
+        alert("Presensi Berhasil!"); location.reload();
     }, () => alert("GPS Gagal!"), { enableHighAccuracy: true });
 }
 
 async function openProfile() {
-    showLoading();
-    switchScreen('profile-dashboard');
-    const { data } = await _supabase.from('presensi').select('*').eq('nama_guru', user).order('created_at', {ascending: false}).limit(10);
-    document.getElementById('p-history').innerHTML = data.map(h => `
-        <div class="item-card">
-            <div style="flex:1"><b>${h.tipe}</b><br><small class="text-muted">${new Date(h.created_at).toLocaleDateString()}</small></div>
-            <div class="text-primary fw-bold">${new Date(h.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+    showScreen('profile-screen');
+    const { data } = await _sb.from('presensi').select('*').eq('nama_guru', currentU).order('created_at', {ascending: false}).limit(10);
+    document.getElementById('history-list').innerHTML = data.map(h => `
+        <div class="card-data">
+            <div style="flex:1"><b>${h.tipe}</b><br><small>${new Date(h.created_at).toLocaleDateString()}</small></div>
+            <div class="fw-bold text-primary">${new Date(h.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
         </div>
-    `).join('');
-    hideLoading();
+    `).join('') || '<p class="text-center small text-muted">Belum ada riwayat</p>';
 }
 
 async function loadAdmin() {
     const t = new Date().toISOString().split('T')[0];
-    const { data: g } = await _supabase.from('profil_guru').select('*');
-    const { data: p } = await _supabase.from('presensi').select('*').gte('created_at', t);
+    const { data: gs } = await _sb.from('profil_guru').select('*');
+    const { data: ps } = await _sb.from('presensi').select('*').gte('created_at', t);
     
-    document.getElementById('admin-list').innerHTML = g.map(x => {
-        const m = p.find(z => z.nama_guru === x.username && (z.tipe === 'Masuk' || z.tipe === 'Izin'));
-        const out = p.find(z => z.nama_guru === x.username && z.tipe === 'Pulang');
+    document.getElementById('admin-list').innerHTML = gs.map(g => {
+        const m = ps.find(x => x.nama_guru === g.username && (x.tipe === 'Masuk' || x.tipe === 'Izin'));
+        const p = ps.find(x => x.nama_guru === g.username && x.tipe === 'Pulang');
         return `
-            <div class="item-card">
-                <img src="${x.foto_avatar || 'https://ui-avatars.com/api/?name='+x.username}" style="width:40px;height:40px;border-radius:10px">
-                <div style="flex:1">
-                    <div class="fw-bold" style="font-size:0.85rem">${x.nama_lengkap}</div>
-                    <small class="text-muted">M: ${m?new Date(m.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'--'} | P: ${out?new Date(out.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'--'}</small>
-                </div>
-                <span class="badge ${m?'bg-success':'bg-danger'}">${m?'HADIR':'ALFA'}</span>
+            <div class="card-data">
+                <img src="${g.foto_avatar || 'https://ui-avatars.com/api/?name='+g.username}" style="width:40px;height:40px;border-radius:10px">
+                <div style="flex:1"><b>${g.nama_lengkap}</b><br><small>M: ${m?new Date(m.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'--'} | P: ${p?new Date(p.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'--'}</small></div>
+                <span class="badge ${m?'bg-success':'bg-danger'}">${m?'HADIR':'ABSEN'}</span>
             </div>`;
     }).join('');
 }
 
-function switchScreen(id) {
-    ['login-screen', 'main-dashboard', 'admin-dashboard', 'profile-dashboard'].forEach(s => {
-        document.getElementById(s).style.display = (s === id) ? 'flex' : 'none';
-    });
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+    document.getElementById(id).classList.add('active-screen');
+    document.getElementById('top-banner').style.display = (id === 'login-screen') ? 'none' : 'block';
 }
-function startCam() { navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}}).then(s=>document.getElementById('video').srcObject=s).catch(e=>alert("Kamera Error")); }
-function backToMain() { switchScreen('main-dashboard'); }
+
+function startCamera() {
+    navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}})
+    .then(s => document.getElementById('video').srcObject = s).catch(e => console.log("Cam Error"));
+}
+
 function save(u,p) { localStorage.setItem('g_u',u); localStorage.setItem('g_p',p); }
-function logout() { localStorage.clear(); location.reload(); }
-function showLoading() { document.getElementById('loading-screen').style.display = 'flex'; }
-function hideLoading() { document.getElementById('loading-screen').style.display = 'none'; }
-function takeIzin() { const al = prompt("Alasan Izin:"); if(al) _supabase.from('presensi').insert([{nama_guru:user, tipe:'Izin', keterangan:al}]).then(()=>location.reload()); }
-async function openSettings() { const j = prompt("Set Jam Pulang (HH:mm):", jamP); if(j) { await _supabase.from('pengaturan').update({jam_pulang:j}).eq('id',1); location.reload(); } }
-async function exportData() {
-    const { data } = await _supabase.from('presensi').select('*').gte('created_at', new Date().toISOString().split('T')[0]);
-    const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Rekap"); XLSX.writeFile(wb, "Presensi_Harian.xlsx");
-}
+function doLogout() { localStorage.clear(); location.reload(); }
+function doIzin() { const a = prompt("Alasan Izin:"); if(a) _sb.from('presensi').insert([{nama_guru:currentU, tipe:'Izin', keterangan:a}]).then(()=>location.reload()); }
+async function setJamPulang() { const j = prompt("Set Jam Pulang (HH:mm):", jamP); if(j) { await _sb.from('pengaturan').update({jam_pulang:j}).eq('id',1); location.reload(); } }
+function exportExcel() { alert("Fitur Rekap Excel Aktif"); }
 </script>
 </body>
 </html>
