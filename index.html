@@ -1,3 +1,1562 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistem Presensi Guru</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap");
+
+      :root {
+        --primary: #6366f1;
+        --success: #22c55e;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+      }
+
+      /* --- Tambahkan kode ini di dalam tag <style> --- */
+
+      .header-profile {
+        background: #0f766e;
+        padding: 14px 16px;
+        border-radius: 0;
+        box-shadow: none;
+        color: #ffffff;
+        border: 0;
+        margin: 0 0 16px;
+        min-height: 72px;
+      }
+
+      .header-profile .d-flex.align-items-center {
+        gap: 11px;
+      }
+
+      #user-display {
+        font-size: 1.14rem;
+        color: #ffffff !important;
+        font-weight: 900;
+        line-height: 1.05;
+        text-transform: none;
+        letter-spacing: 0.5px;
+        text-decoration: underline;
+        text-decoration-color: rgba(255, 255, 255, 0.6);
+        text-decoration-thickness: 2px;
+        text-underline-offset: 4px;
+      }
+
+      #user-role, #user-role-display {
+        font-size: 0.74rem;
+        color: #d9f99d !important;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-top: 1px;
+      }
+
+      .header-profile {
+        background: #0f766e;
+        padding: 14px 16px;
+        border-radius: 0;
+        box-shadow: none;
+        color: #ffffff;
+        border: 0;
+        margin: 0 0 16px;
+        min-height: 72px;
+      }
+
+      .header-profile img {
+        border: 2px solid rgba(255, 255, 255, 0.3);
+      }
+      /* Container Utama App */
+      body, #main-app, #admin-panel, #profile-page, #attendance-dashboard {
+        background: linear-gradient(135deg, #e6fffa 0%, #dcfdf6 40%, #bbf7d0 100%);
+        color: #0f172a;
+        min-height: 100vh;
+      }
+      #main-app, #admin-panel, #profile-page, #attendance-dashboard {
+        padding: 18px 16px 24px;
+        border-radius: 18px;
+      }
+      #admin-panel, #profile-page, #attendance-dashboard {
+        border: 1px solid rgba(15, 118, 110, 0.14);
+        box-shadow: 0 14px 30px rgba(15, 118, 110, 0.08);
+      }
+      #main-app {
+        padding: 25px !important;
+      }
+
+      /* Styling Jam Utama */
+      .date-time-banner {
+        background: linear-gradient(90deg, #effaf5 0%, #d3f8e2 50%, #eafaf9 100%);
+        border: 2px solid rgba(22, 163, 74, 0.55);
+        border-radius: 16px;
+        padding: 10px 12px;
+        margin-bottom: 12px;
+        box-shadow: 0 0 12px rgba(22, 163, 74, 0.2);
+      }
+
+      .date-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 6px;
+      }
+
+      .date-label {
+        font-size: 0.95rem;
+        color: #144b3d;
+        font-weight: 800;
+        line-height: 1.05;
+        max-width: 65%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-transform: uppercase;
+      }
+
+      .time-label {
+        font-size: 2.1rem;
+        color: #064e3b;
+        font-weight: 900;
+        line-height: 1;
+        text-align: right;
+        min-width: 90px;
+      }
+
+      .running-text {
+        position: relative;
+        height: 28px;
+        overflow: hidden;
+        color: #055f46;
+        font-weight: 700;
+        font-size: 0.78rem;
+        margin-top: 0;
+        background: linear-gradient(90deg, #d1fae5 0%, #bbf7d0 48%, #f0fdf4 100%);
+        border: 1px solid #86efac;
+        border-radius: 12px;
+        padding: 6px 12px;
+      }
+
+      .running-text .marquee-inner {
+        display: inline-block;
+        padding-left: 100%;
+        animation: marquee 9.5s linear infinite;
+        white-space: nowrap;
+        color: #065f46;
+      }
+      }
+
+      .time-label {
+        font-size: 1.75rem;
+        color: #064e3b;
+        font-weight: 800;
+      }
+
+      .running-text {
+        position: relative;
+        height: 26px;
+        overflow: hidden;
+        color: #065f46;
+        font-weight: 700;
+        font-size: 0.78rem;
+        margin-top: 8px;
+        background: linear-gradient(90deg, #d1fae5 0%, #bbf7d0 48%, #f0fdf4 100%);
+        border: 1px solid #86efac;
+        border-radius: 12px;
+        padding: 2px 8px;
+      }
+
+      .running-text .marquee-inner {
+        display: inline-block;
+        padding-left: 100%;
+        animation: marquee 9.5s linear infinite;
+        white-space: nowrap;
+        color: #065f46;
+      }
+      }
+
+      .date-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .date-label {
+        font-size: 1.1rem;
+        color: #334155;
+        font-weight: 700;
+        text-transform: uppercase;
+        line-height: 1.2;
+      }
+
+      .time-label {
+        font-size: 2rem;
+        color: #0f172a;
+        font-weight: 800;
+        line-height: 1.2;
+      }
+
+      .running-text {
+        position: relative;
+        height: 22px;
+        overflow: hidden;
+        color: #334155;
+        font-weight: 700;
+        font-size: 0.75rem;
+        margin-top: 6px;
+      }
+
+      .running-text .marquee-inner {
+        display: inline-block;
+        padding-left: 100%;
+        animation: marquee 12s linear infinite;
+        white-space: nowrap;
+      }
+
+      .running-text::before,
+      .running-text::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        width: 35px;
+        height: 100%;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .running-text::before {
+        left: 0;
+        background: linear-gradient(to right, #f8fafc, rgba(248, 250, 252, 0));
+      }
+
+      .running-text::after {
+        right: 0;
+        background: linear-gradient(to left, #f8fafc, rgba(248, 250, 252, 0));
+      }
+
+      @keyframes marquee {
+        from {
+          transform: translateX(0%);
+        }
+        to {
+          transform: translateX(-100%);
+        }
+      }
+
+      /* Box Kamera yang lebih estetik (padukan dengan style di bawah, hapus duplikat) */
+      .camera-box {
+        margin: 20px auto 15px;
+        width: 90%;
+        max-width: 320px;
+        aspect-ratio: 1 / 1;
+        height: auto;
+        border-radius: 50%;
+        overflow: hidden;
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        border: 5px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        position: relative;
+      }
+      .camera-box::before {
+        content: "";
+        position: absolute;
+        inset: 8px;
+        border-radius: 50%;
+        border: 1px dashed rgba(156, 163, 175, 0.45);
+        pointer-events: none;
+      }
+
+      #video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: scaleX(-1); /* Tambahkan ini agar kamera tidak terbalik */
+  -webkit-transform: scaleX(-1);
+      }
+
+      /* Pesan Status di Bawah */
+      #lock-msg {
+        background: rgba(99, 102, 241, 0.05);
+        padding: 10px;
+        border-radius: 12px;
+        font-weight: 600;
+        color: #6366f1;
+        border: 1px dashed rgba(99, 102, 241, 0.2);
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background: linear-gradient(-45deg, #6366f1, #a855f7, #ec4899);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      @keyframes gradientBG {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .app-shell {
+        width: 95%;
+        max-width: 430px;
+        height: 92vh;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        border-radius: 35px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        position: relative;
+        border: 4px solid white;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .school-banner {
+    padding: 20px; text-align: center;
+    background: transparent; border: none;
+    margin-bottom: 0;
+}
+
+#school-name { font-size: 24px !important; color: #1e88e5; letter-spacing: 0.5px; }
+
+
+      #login-screen,
+      #register-screen,
+      #main-app,
+      #admin-panel,
+      #profile-page {
+        display: none;
+        padding: 20px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* --- STYLE BARU UNTUK ADMIN SESUAI GAMBAR --- */
+      /* --- GANTI KODE INI DI DALAM TAG <STYLE> --- */
+
+      /* Kotak Foto Presensi yang Lebih Elegan */
+      .admin-thumb-box {
+        width: 55px;
+        height: 55px;
+        border-radius: 12px;
+
+        /* GANTI BARIS INI: Dari 2px solid #000 menjadi border tipis transparan */
+        border: 1px solid rgba(0, 0, 0, 0.1);
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background: #fcfcfc; /* Warna background sedikit lebih soft */
+        cursor: pointer;
+
+        /* TAMBAHKAN INI: Efek bayangan halus agar lebih elegan */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+        transition: all 0.2s ease;
+      }
+
+      /* TAMBAHKAN INI: Efek saat kursor di atasnya (hover) */
+      .admin-thumb-box:hover {
+        border-color: rgba(
+          99,
+          102,
+          241,
+          0.3
+        ); /* Warna primary tipis saat hover */
+        box-shadow: 0 4px 10px rgba(99, 102, 241, 0.1);
+      }
+
+      .admin-thumb-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      /* Ukuran Jam: Dibuat pas, tidak menutupi elemen lain */
+      .waktu-teks {
+        font-size: 18px !important; /* Ukuran diturunkan agar elegan */
+        font-weight: 800;
+        color: #1e293b;
+        line-height: 1.2;
+      }
+
+      /* Label Kecil di atas jam */
+      .label-jam {
+        font-size: 9px !important;
+        color: #94a3b8;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+        text-transform: uppercase;
+      }
+
+      /* Keterangan Terlambat: Dibuat kecil & manis */
+      .badge-terlambat {
+        background-color: rgba(239, 68, 68, 0.1); /* Merah transparan */
+        color: #ef4444;
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-size: 8px !important; /* Sangat kecil agar tidak dominan */
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        margin-top: 4px;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+      }
+      /* (Camera styling sudah ditetapkan di atas, baris lama dihapus agar tidak konflik) */
+      .cool-btn {
+        border: none;
+        border-radius: 20px;
+        padding: 15px;
+        color: white;
+        font-weight: 800;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: 0.3s;
+        text-decoration: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      .btn-masuk {
+        background: linear-gradient(135deg, #10b981, #059669);
+      }
+      .btn-izin {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+      }
+      .btn-pulang {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        width: 100%;
+        margin-top: 10px;
+        flex-direction: row;
+        gap: 10px;
+        justify-content: center;
+      }
+      .btn-disabled {
+        background: #cbd5e1 !important;
+        color: #64748b !important;
+        opacity: 0.6;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      #photo-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .modal-content-img {
+        background: white;
+        padding: 15px;
+        border-radius: 25px;
+        width: 100%;
+        max-width: 350px;
+        text-align: center;
+      }
+
+      .app-shell::-webkit-scrollbar {
+        width: 0;
+        background: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="photo-modal" onclick="this.style.display = 'none'">
+      <div class="modal-content-img" onclick="event.stopPropagation()">
+        <h6 id="modal-title" class="fw-bold text-primary mb-2 small">
+          PREVIEW FOTO
+        </h6>
+        <img id="modal-img" src="" class="w-100 rounded-3 mb-3" />
+        <button
+          class="btn btn-dark w-100 rounded-pill btn-sm"
+          onclick="
+            document.getElementById('photo-modal').style.display = 'none'
+          "
+        >
+          TUTUP
+        </button>
+      </div>
+    </div>
+
+    <div class="app-shell">
+      <div class="school-banner shadow-sm">
+        <img
+          id="logo-img"
+          src="ChatGPTImageApr1202609_31_16PM.jpeg"
+          style="width: 40px; height: 40px; border-radius: 10px"
+        />
+        <h6 id="school-name" class="fw-bold m-0 mt-1 text-primary small">
+          SISTEM PRESENSI
+        </h6>
+      </div>
+
+      <div id="login-screen" class="py-4">
+        <div class="text-center mb-4">
+          <i
+            class="fas fa-user-circle text-primary"
+            style="font-size: 4rem"
+          ></i>
+        </div>
+        <h5 class="fw-bold text-center mb-4">Silahkan Login</h5>
+        <input
+          type="text"
+          id="login-user"
+          class="form-control mb-3 rounded-pill p-3 border-0 bg-light"
+          placeholder="Username"
+        />
+        <div class="position-relative mb-4">
+          <input
+            type="password"
+            id="login-pass"
+            class="form-control rounded-pill p-3 border-0 bg-light"
+            placeholder="Password"
+          />
+          <i
+            class="fas fa-eye position-absolute top-50 end-0 translate-middle-y me-3 text-muted"
+            style="cursor: pointer"
+            onclick="togglePass('login-pass', this)"
+          ></i>
+        </div>
+        <button
+          class="btn btn-primary w-100 py-3 rounded-pill fw-bold"
+          onclick="handleLogin()"
+        >
+          MASUK
+        </button>
+        <p class="mt-4 text-center small text-muted">
+          Belum punya akun?
+          <a href="#" onclick="showScreen('register-screen')" class="fw-bold"
+            >Daftar</a
+          >
+        </p>
+      </div>
+
+      <div id="register-screen" class="py-4">
+        <h5 class="fw-bold text-center mb-4">Daftar Akun Guru</h5>
+        <input
+          type="text"
+          id="reg-nama"
+          class="form-control mb-3 rounded-4 p-3 bg-light border-0"
+          placeholder="Nama Lengkap"
+        />
+        <input
+          type="text"
+          id="reg-user"
+          class="form-control mb-3 rounded-4 p-3 bg-light border-0"
+          placeholder="Username"
+        />
+        <input
+          type="password"
+          id="reg-pass"
+          class="form-control mb-4 rounded-4 p-3 bg-light border-0"
+          placeholder="Password"
+        />
+        <button
+          class="btn btn-dark w-100 py-3 rounded-pill fw-bold"
+          onclick="handleRegister()"
+        >
+          DAFTAR SEKARANG
+        </button>
+        <button
+          class="btn btn-link w-100 mt-2 text-muted small"
+          onclick="showScreen('login-screen')"
+        >
+          Kembali ke Login
+        </button>
+      </div>
+
+     <div id="main-app">
+    <div class="header-profile d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center">
+            <div class="position-relative">
+                <img id="mini-avatar" src="" style="width:58px; height:58px; border-radius:14px; object-fit:cover;" onclick="showProfile()">
+                <div style="position:absolute; bottom:-3px; right:-3px; width:14px; height:14px; background:#22c55e; border:2px solid #064e3b; border-radius:50%;"></div>
+            </div>
+            <div class="ms-3">
+    <div class="d-flex align-items-center gap-2" onclick="showProfile()" style="cursor: pointer;">
+        <h6 class="m-0" id="user-display" style="color:white; font-weight:800;">-</h6>
+        <i class="fas fa-pencil-alt text-white-50" style="font-size: 0.9rem;"></i>
+    </div>
+    <span id="user-role-display" style="font-size:10px; color:#fde68a; font-weight:700; text-transform:uppercase;">GURU / STAFF</span>
+</div>
+        </div>
+        <button class="btn btn-link text-white-50 p-0" onclick="logout()">
+            <i class="fas fa-power-off"></i>
+        </button>
+    </div>
+
+        <div class="date-time-banner mb-3">
+          <div class="date-top">
+            <span id="date" class="date-label">JUMAT, 3 APRIL</span>
+            <span id="clock" class="time-label">00:00</span>
+          </div>
+          <div id="marquee" class="running-text" aria-live="polite">
+            <span class="marquee-inner">INFO KEGIATAN HARIAN TEKS JALAN • INFO KEGIATAN HARIAN TEKS JALAN • INFO KEGIATAN HARIAN TEKS JALAN</span>
+          </div>
+        </div>
+
+        <div class="camera-box">
+          <video id="video" autoplay playsinline></video>
+        </div>
+
+        <div class="row gx-2 mb-2">
+          <div class="col-6">
+            <button
+              id="btn-masuk"
+              class="cool-btn btn-masuk w-100"
+              onclick="takeAbsen('Masuk')"
+            >
+              <i class="fas fa-sign-in-alt mb-1"></i>
+              <span>MASUK</span>
+            </button>
+          </div>
+          <div class="col-6">
+            <button
+              id="btn-izin"
+              class="cool-btn btn-izin w-100"
+              onclick="takeIzin()"
+            >
+              <i class="fas fa-envelope mb-1"></i>
+              <span>IZIN</span>
+            </button>
+          </div>
+        </div>
+
+        <button
+          id="btn-pulang"
+          class="cool-btn btn-pulang"
+          onclick="takeAbsen('Pulang')"
+        >
+          <i class="fas fa-door-open"></i>
+          <span>ABSEN PULANG SEKARANG</span>
+        </button>
+
+        <div id="lock-msg" class="text-center small mt-4"></div>
+      </div>
+
+      <div id="admin-panel">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-bold m-0">ADMIN DASHBOARD</h6>
+          <div class="d-flex gap-2">
+            <button
+              class="btn btn-light btn-sm rounded-circle border"
+              onclick="loadAdminDashboard()"
+            >
+              <i class="fas fa-sync-alt"></i>
+            </button>
+            <button
+              class="btn btn-danger btn-sm rounded-circle"
+              onclick="logout()"
+            >
+              <i class="fas fa-power-off"></i>
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="card border-0 shadow-sm rounded-4 mb-3"
+          style="background: #f1f5f9"
+        >
+          <div class="card-body p-3">
+            <div class="d-flex align-items-center mb-2 small fw-bold">
+              <i class="fas fa-bell text-warning me-2"></i> Info Kegiatan Harian
+            </div>
+            <textarea
+              id="info-kegiatan"
+              class="form-control form-control-sm border-0 shadow-sm"
+              style="resize: vertical; min-height: 60px;"
+              placeholder="Masukkan info kegiatan harian (akan tampil di halaman absen)..."
+            ></textarea>
+            <button
+              class="btn btn-warning btn-sm w-100 rounded-pill fw-bold mt-2"
+              onclick="saveInfoKegiatan()"
+            >
+              SIMPAN INFO
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="card border-0 shadow-sm rounded-4 mb-3"
+          style="background: #f1f5f9"
+        >
+          <div class="card-body p-3">
+            <div class="d-flex align-items-center mb-2 small fw-bold">
+              <i class="fas fa-clock text-primary me-2"></i> Pengaturan Jam
+              Pulang
+            </div>
+            <div class="row gx-2 mb-2">
+              <div class="col-6">
+                <input
+                  type="time"
+                  id="set-jam-buka"
+                  class="form-control form-control-sm border-0 shadow-sm"
+                />
+              </div>
+              <div class="col-6">
+                <input
+                  type="time"
+                  id="set-jam-tutup"
+                  class="form-control form-control-sm border-0 shadow-sm"
+                />
+              </div>
+            </div>
+            <button
+              class="btn btn-primary btn-sm w-100 rounded-pill fw-bold"
+              onclick="saveTimeSettings()"
+            >
+              UPDATE JADWAL
+            </button>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div
+            id="admin-stats"
+            class="small text-muted fw-bold"
+            style="font-size: 10px"
+          ></div>
+          <button
+            class="btn btn-success btn-sm rounded-pill fw-bold"
+            onclick="exportDataHorizontal()"
+          >
+            <i class="fas fa-file-excel me-1"></i> REKAP
+          </button>
+        </div>
+        <div id="list-admin-view" style="max-height: 400px; overflow-y: auto;"></div>
+      </div>
+
+    <div id="profile-page">
+  <div class="text-center mb-4">
+    <img id="p-img" src="" style="width: 100px; height: 100px; border-radius: 30px; object-fit: cover; border: 4px solid white; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);" />
+    <input type="file" id="input-foto" style="display: none" onchange="uploadFotoProfil(this)" />
+    <button class="btn btn-primary btn-sm d-block mx-auto mt-2 rounded-pill" onclick="document.getElementById('input-foto').click()">
+      Ganti Foto
+    </button>
+  </div>
+
+  <div class="bg-white p-3 rounded-4 shadow-sm border mb-3">
+    <label class="small fw-bold text-muted">NAMA LENGKAP</label>
+    <input type="text" id="edit-nama" class="form-control border-0 bg-light mb-2" />
+    <label class="small fw-bold text-muted">JABATAN</label>
+    <input type="text" id="edit-jabatan" class="form-control border-0 bg-light mb-3" />
+    <button class="btn btn-primary w-100 rounded-pill fw-bold mb-2" onclick="updateProfile()">
+      SIMPAN
+    </button>
+    <button class="btn btn-outline-danger w-100 rounded-pill fw-bold" onclick="logout()">
+      LOGOUT
+    </button>
+  </div>
+
+  <button class="btn btn-outline-primary w-100 rounded-pill fw-bold mb-3 py-2" onclick="showScreen('attendance-dashboard'); loadMonthlyHistory()">
+    <i class="fas fa-history me-2"></i> BUKA RIWAYAT ABSENSI (DETAIL)
+  </button>
+
+  <button class="btn btn-light w-100 rounded-pill border" onclick="showScreen('main-app')">
+    KEMBALI
+  </button>
+</div>
+
+    <!-- ATTENDANCE DASHBOARD PAGE -->
+    <div id="attendance-dashboard" style="display: none; padding: 15px;">
+      <div class="container-fluid" style="margin-bottom: 100px;">
+        <div class="bg-white p-3 rounded-4 shadow-sm mb-3">
+          <h5 class="fw-bold mb-3"><i class="fas fa-calendar-alt me-2"></i> RIWAYAT ABSENSI BULAN INI</h5>
+          <div class="d-flex gap-2 mb-3">
+            <input type="month" id="month-filter" class="form-control" onchange="loadMonthlyHistory()" />
+            <button class="btn btn-primary" onclick="loadMonthlyHistory()"><i class="fas fa-sync"></i></button>
+          </div>
+          <div class="row mb-3">
+            <div class="col-6">
+              <div class="bg-light p-2 rounded text-center">
+                <small class="text-muted">Jumlah Masuk</small>
+                <div class="fw-bold" id="count-masuk" style="font-size: 20px; color: #10b981;">0</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="bg-light p-2 rounded text-center">
+                <small class="text-muted">Jumlah Izin</small>
+                <div class="fw-bold" id="count-izin" style="font-size: 20px; color: #f59e0b;">0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="history-list-monthly" class="mb-3">
+          <p class="text-center text-muted py-4">Memuat riwayat...</p>
+        </div>
+      </div>
+      <button class="btn btn-light w-100 rounded-pill border position-fixed bottom-0 start-0 m-3" style="max-width: calc(100% - 24px);" onclick="showScreen('profile-page')"><i class="fas fa-arrow-left me-2"></i> KEMBALI KE PROFIL</button>
+    </div>
+
+    <canvas id="canvas" style="display: none"></canvas>
+
+    <script>
+      const SUPABASE_URL = "https://dddbjqnoovjbdesvaulo.supabase.co";
+      const SUPABASE_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkZGJqcW5vb3ZqYmRlc3ZhdWxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNDAzMTUsImV4cCI6MjA5MDYxNjMxNX0.yLeBX4C8bwpCngvOViMR-eocHVFjv0BXXBuPJWwb9KU";
+      const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      const SCHOOL_LAT = -6.250736361618612;
+      const SCHOOL_LON = 106.46656879999998;
+      const MAX_DISTANCE = 50;
+
+      let currentUser = "";
+      let userData = null;
+      let jamPulangBuka = 14;
+      let jamPulangTutup = 17;
+
+      window.onload = () => {
+        updateClock();
+        setInterval(updateClock, 1000);
+        loadSchoolData();
+        checkAutoLogin();
+      };
+
+      function togglePass(id, el) {
+        const input = document.getElementById(id);
+        if (input.type === "password") {
+          input.type = "text";
+          el.classList.replace("fa-eye", "fa-eye-slash");
+        } else {
+          input.type = "password";
+          el.classList.replace("fa-eye-slash", "fa-eye");
+        }
+      }
+
+      function showScreen(id) {
+        const screens = [
+          "login-screen",
+          "register-screen",
+          "main-app",
+          "admin-panel",
+          "profile-page",
+          "attendance-dashboard",
+        ];
+        screens.forEach((s) => {
+          const el = document.getElementById(s);
+          if (el) el.style.display = s === id ? "block" : "none";
+        });
+      }
+
+// 1. Fungsi Upload Foto (Otomatis Simpan ke Supabase)
+async function uploadFotoProfil(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64 = e.target.result;
+      // Update UI preview
+      document.getElementById("p-img").src = base64;
+      document.getElementById("mini-avatar").src = base64;
+
+      // Update ke Database
+      const { error } = await _supabase
+        .from("profil_guru")
+        .update({ foto_avatar: base64 })
+        .eq("username", currentUser);
+
+      if (error) alert("Gagal simpan foto: " + error.message);
+      else alert("Foto profil diperbarui!");
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+// 2. Fungsi Update Nama & Jabatan
+async function updateProfile() {
+  const nama = document.getElementById("edit-nama").value;
+  const jabatan = document.getElementById("edit-jabatan").value;
+
+  const { error } = await _supabase
+    .from("profil_guru")
+    .update({ nama_lengkap: nama, jabatan: jabatan })
+    .eq("username", currentUser);
+
+  if (error) {
+    alert("Gagal update profil: " + error.message);
+  } else {
+    alert("Profil berhasil disimpan!");
+    // Update tampilan halaman depan secara langsung
+    document.getElementById("user-display").innerText = nama;
+    document.getElementById("user-role-display").innerText = jabatan || "GURU / STAFF";
+    // Update data lokal
+    userData.nama_lengkap = nama;
+    userData.jabatan = jabatan;
+    showScreen("main-app");
+  }
+}
+
+// 3. Fungsi Load Riwayat (Sesuai Struktur Admin: Masuk Kiri, Pulang Kanan)
+async function loadUserHistory() {
+  const container = document.getElementById("user-history-list");
+  container.innerHTML = '<p class="text-center small text-muted py-3">Memuat riwayat...</p>';
+
+  const { data: presensi } = await _supabase
+    .from("presensi")
+    .select("*")
+    .eq("nama_guru", currentUser)
+    .order("created_at", { ascending: false })
+    .limit(30);
+
+  if (!presensi || presensi.length === 0) {
+    container.innerHTML = '<p class="text-center small text-muted py-3">Belum ada riwayat presensi.</p>';
+    return;
+  }
+
+  // Kelompokkan data per tanggal
+  const historyMap = {};
+  presensi.forEach((item) => {
+    const tgl = new Date(item.created_at).toLocaleDateString("id-ID", {
+      weekday: "long",
+      day: "numeric",
+      month: "short",
+    });
+    if (!historyMap[tgl]) historyMap[tgl] = { masuk: null, pulang: null, izin: null };
+    if (item.tipe === "Masuk") historyMap[tgl].masuk = item;
+    if (item.tipe === "Izin") historyMap[tgl].izin = item;
+    if (item.tipe === "Pulang") historyMap[tgl].pulang = item;
+  });
+
+  let html = "";
+  for (const tgl in historyMap) {
+    const m = historyMap[tgl].masuk;
+    const i = historyMap[tgl].izin;
+    const p = historyMap[tgl].pulang;
+
+    const jamM = m ? new Date(m.created_at).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "--:--";
+    const jamP = p ? new Date(p.created_at).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "--:--";
+
+    html += `
+      <div class="bg-white mb-2 p-2 shadow-sm rounded-3 border" style="border-color: #e2e8f0;">
+          <div class="text-muted fw-bold mb-2 px-1" style="font-size:9px; text-transform: uppercase; color: #64748b;">${tgl}</div>
+          <div class="d-flex justify-content-between align-items-center gap-2">
+              <div class="d-flex align-items-center gap-2" style="flex: 1;">
+                  <div class="text-center" style="min-width: 70px;">
+                      <div class="label-jam">MASUK</div>
+                      <div class="waktu-teks" style="font-size:13px !important;">${jamM}</div>
+                      ${i ? '<small style="display: block; color: #f59e0b; font-weight: 700; font-size: 8px; margin-top: 2px;">IZIN</small>' : ''}
+                      ${m?.keterangan === 'Terlambat' ? '<small style="display: block; color: #ef4444; font-weight: 700; font-size: 8px; margin-top: 2px;">TERLAMBAT</small>' : ''}
+                  </div>
+                  <div class="admin-thumb-box" style="width:35px; height:35px; border-radius: 8px;" onclick="${m?.foto ? `viewPhoto('${m.foto}', 'Masuk: ${tgl}')` : ""}">
+                      ${m?.foto ? `<img src="${m.foto}" style="width:100%; height:100%; object-fit: cover;">` : '<small style="font-size:7px; color:#cbd5e1;">FOTO</small>'}
+                  </div>
+              </div>
+              <div class="d-flex align-items-center gap-2" style="flex: 1;">
+                  <div class="text-center" style="min-width: 70px;">
+                      <div class="label-jam">PULANG</div>
+                      <div class="waktu-teks" style="font-size:13px !important;">${jamP}</div>
+                      ${p?.keterangan === 'Terlambat' ? '<small style="display: block; color: #ef4444; font-weight: 700; font-size: 8px; margin-top: 2px;">TERLAMBAT</small>' : ''}
+                  </div>
+                  <div class="admin-thumb-box" style="width:35px; height:35px; border-radius: 8px;" onclick="${p?.foto ? `viewPhoto('${p.foto}', 'Pulang: ${tgl}')` : ""}">
+                      ${p?.foto ? `<img src="${p.foto}" style="width:100%; height:100%; object-fit: cover;">` : '<small style="font-size:7px; color:#cbd5e1;">FOTO</small>'}
+                  </div>
+              </div>
+          </div>
+      </div>`;
+  }
+  container.innerHTML = html;
+}
+
+// 4. Modifikasi Fungsi showProfile agar memuat Riwayat
+function showProfile() {
+  document.getElementById("p-img").src = userData.foto_avatar || `https://ui-avatars.com/api/?name=${userData.nama_lengkap}`;
+  document.getElementById("edit-nama").value = userData.nama_lengkap;
+  document.getElementById("edit-jabatan").value = userData.jabatan || "";
+  
+  showScreen("profile-page");
+  loadUserHistory(); // Panggil riwayat saat profil dibuka
+}
+
+// 5. LOAD MONTHLY HISTORY DASHBOARD
+async function loadMonthlyHistory() {
+  const monthFilter = document.getElementById("month-filter");
+  if (!monthFilter.value) {
+    const now = new Date();
+    monthFilter.value = now.toISOString().slice(0, 7);
+  }
+
+  const [year, month] = monthFilter.value.split("-");
+  const startDate = new Date(year, parseInt(month) - 1, 1).toISOString();
+  const endDate = new Date(year, parseInt(month), 0, 23, 59, 59).toISOString();
+
+  const container = document.getElementById("history-list-monthly");
+  container.innerHTML = '<p class="text-center text-muted py-4">Memuat riwayat...</p>';
+
+  const { data: presensi } = await _supabase
+    .from("presensi")
+    .select("*")
+    .eq("nama_guru", currentUser)
+    .gte("created_at", startDate)
+    .lte("created_at", endDate)
+    .order("created_at", { ascending: false });
+
+  if (!presensi || presensi.length === 0) {
+    container.innerHTML = '<p class="text-center text-muted py-4">Belum ada riwayat presensi bulan ini.</p>';
+    document.getElementById("count-masuk").textContent = "0";
+    document.getElementById("count-izin").textContent = "0";
+    return;
+  }
+
+  // Hitung statistik
+  let countMasuk = 0, countIzin = 0;
+  presensi.forEach(item => {
+    if (item.tipe === "Masuk") countMasuk++;
+    if (item.tipe === "Izin") countIzin++;
+  });
+  document.getElementById("count-masuk").textContent = countMasuk;
+  document.getElementById("count-izin").textContent = countIzin;
+
+  // Kelompokkan per tanggal
+  const historyMap = {};
+  presensi.forEach((item) => {
+    const tgl = new Date(item.created_at).toLocaleDateString("id-ID", {
+      weekday: "short",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+    if (!historyMap[tgl]) historyMap[tgl] = [];
+    historyMap[tgl].push(item);
+  });
+
+  let html = "";
+  for (const tgl in historyMap) {
+    const items = historyMap[tgl];
+    html += `<div class="bg-white p-3 rounded-3 shadow-sm mb-3 border" style="border-color: #e2e8f0;">
+      <div class="fw-bold mb-2" style="font-size: 13px; color: #475569;">${tgl}</div>`;
+
+    items.forEach((item) => {
+      const jam = new Date(item.created_at).toLocaleTimeString("id-ID", { 
+        hour: "2-digit", 
+        minute: "2-digit" 
+      });
+      
+      const badgeColor = item.tipe === "Masuk" ? "success" : item.tipe === "Pulang" ? "info" : "warning";
+      const badgeText = item.tipe === "Izin" ? "IZIN" : item.tipe;
+      const statusTerlambat = item.keterangan === "Terlambat" ? '<span style="margin-left: 8px; font-size: 10px; background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 3px;">⚠️ TERLAMBAT</span>' : '';
+
+      html += `<div class="d-flex justify-content-between align-items-center p-2 bg-light rounded mb-2">
+        <div class="d-flex align-items-center gap-2" style="flex: 1;">
+          <span class="badge bg-${badgeColor}" style="font-size: 11px; padding: 4px 8px; font-weight: 700;">${badgeText}</span>
+          <div>
+            <div style="font-size: 12px; font-weight: 600;">${jam}</div>
+            <small style="color: #64748b; font-size: 10px;">${item.keterangan || "-"}</small>
+            ${statusTerlambat}
+          </div>
+        </div>
+        <div class="admin-thumb-box" style="width: 40px; height: 40px; border-radius: 8px; cursor: pointer;" onclick="${item.foto ? `viewPhoto('${item.foto}', '${badgeText}: ${tgl}')` : ""}">
+          ${item.foto ? `<img src="${item.foto}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">` : '<small style="font-size: 8px; color: #cbd5e1;">NO FOTO</small>'}
+        </div>
+      </div>`;
+    });
+
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+// 6. Fungsi Helper Preview Foto (Jika belum ada)
+function viewPhoto(url, title) {
+    document.getElementById('modal-img').src = url;
+    document.getElementById('modal-title').innerText = title;
+    document.getElementById('photo-modal').style.display = 'flex';
+}
+
+      async function checkAutoLogin() {
+        const u = localStorage.getItem("guru_user");
+        const p = localStorage.getItem("guru_pass");
+        if (u && p) {
+          const { data: adm } = await _supabase
+            .from("admin_users")
+            .select("*")
+            .eq("username", u)
+            .eq("password", p)
+            .single();
+          if (adm) {
+            showScreen("admin-panel");
+            loadAdminDashboard();
+            return;
+          }
+          const { data: guru } = await _supabase
+            .from("profil_guru")
+            .select("*")
+            .eq("username", u)
+            .eq("password", p)
+            .single();
+          if (guru) processLogin(guru);
+          else showScreen("login-screen");
+        } else showScreen("login-screen");
+      }
+
+      async function handleLogin() {
+        const u = document.getElementById("login-user").value;
+        const p = document.getElementById("login-pass").value;
+        const { data: adm } = await _supabase
+          .from("admin_users")
+          .select("*")
+          .eq("username", u)
+          .eq("password", p)
+          .single();
+        if (adm) {
+          localStorage.setItem("guru_user", u);
+          localStorage.setItem("guru_pass", p);
+          showScreen("admin-panel");
+          loadAdminDashboard();
+          return;
+        }
+        const { data: guru } = await _supabase
+          .from("profil_guru")
+          .select("*")
+          .eq("username", u)
+          .eq("password", p)
+          .single();
+        if (guru) {
+          localStorage.setItem("guru_user", u);
+          localStorage.setItem("guru_pass", p);
+          processLogin(guru);
+        } else alert("Login Gagal!");
+      }
+
+      function processLogin(data) {
+    currentUser = data.username;
+    userData = data;
+
+    // Menampilkan Nama
+    document.getElementById("user-display").innerText = data.nama_lengkap;
+
+    // MENAMPILKAN JABATAN secara dinamis
+    const roleEl = document.getElementById("user-role-display");
+    if (roleEl) {
+        // Ambil dari kolom 'jabatan', jika kosong tampilkan default
+        roleEl.innerText = data.jabatan || "GURU / STAFF";
+    }
+
+    // Menampilkan Avatar/Foto
+    const avatarEl = document.getElementById("mini-avatar");
+    if (data.foto_avatar) {
+        avatarEl.src = data.foto_avatar;
+    } else {
+        avatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nama_lengkap)}&background=random&color=fff`;
+    }
+
+    // Sisa kode lainnya...
+    showScreen("main-app");
+    loadSchoolData();
+    startCamera();
+    checkTodayPresence();
+}
+
+      function logout() {
+        localStorage.clear();
+        location.reload();
+      }
+
+      // --- FIXED ADMIN DASHBOARD ---
+      async function loadAdminDashboard() {
+        try {
+          const tgl = new Date().toISOString().split("T")[0];
+          const { data: gurus } = await _supabase
+            .from("profil_guru")
+            .select("*")
+            .order("nama_lengkap");
+          const { data: pres } = await _supabase
+            .from("presensi")
+            .select("*")
+            .gte("created_at", tgl);
+
+          let sudahHadir = 0;
+          let html = "";
+
+          gurus.forEach((g) => {
+            const m = pres.find(
+              (x) =>
+                x.nama_guru === g.username &&
+                (x.tipe === "Masuk" || x.tipe === "Izin"),
+            );
+            const p = pres.find(
+              (x) => x.nama_guru === g.username && x.tipe === "Pulang",
+            );
+
+            if (m) sudahHadir++;
+
+            const jamM = m
+              ? new Date(m.created_at).toLocaleTimeString("id-ID", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "--:--";
+            const jamP = p
+              ? new Date(p.created_at).toLocaleTimeString("id-ID", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "--:--";
+
+            html += `
+                        <div class="bg-white mb-3 p-3 shadow-sm" style="border-radius: 20px; border: 1px solid #eee;">
+                            <div class="d-flex align-items-center mb-2">
+                                <img src="${g.foto_avatar || "https://ui-avatars.com/api/?name=" + g.nama_lengkap}" 
+                                     style="width:50px; height:50px; border-radius:12px; margin-right:12px; object-fit:cover;">
+                                <h6 class="mb-0 fw-bold" style="font-size:14px;">${g.nama_lengkap}</h6>
+                            </div>
+                            <div style="border-top: 2px dotted #f0f0f0; margin: 10px 0;"></div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="text-center">
+                                        <div class="label-jam">JAM MASUK</div>
+                                        <div class="waktu-teks">${jamM}</div>
+                                        ${m?.keterangan === "Terlambat" ? '<div class="badge-terlambat">TERLAMBAT</div>' : ""}
+                                        ${m?.tipe === "Izin" ? '<div class="badge-terlambat" style="background:#fef3c7; color:#92400e;">IZIN</div>' : ""}
+                                    </div>
+                                    <div class="admin-thumb-box" onclick="${m?.foto ? `viewPhoto('${m.foto}', 'Masuk: ${g.nama_lengkap}')` : ""}">
+                                        ${m?.foto ? `<img src="${m.foto}">` : '<small style="font-size:8px;color:#ccc">FOTO</small>'}
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="text-center">
+                                        <div class="label-jam">JAM PULANG</div>
+                                        <div class="waktu-teks">${jamP}</div>
+                                        ${p?.keterangan === "Terlambat" ? '<div class="badge-terlambat">TERLAMBAT</div>' : ""}
+                                    </div>
+                                    <div class="admin-thumb-box" onclick="${p?.foto ? `viewPhoto('${p.foto}', 'Pulang: ${g.nama_lengkap}')` : ""}">
+                                        ${p?.foto ? `<img src="${p.foto}">` : '<small style="font-size:8px;color:#ccc">FOTO</small>'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+          });
+
+          document.getElementById("list-admin-view").innerHTML = html;
+          document.getElementById("admin-stats").innerHTML =
+            `Total: ${gurus.length} | Hadir: ${sudahHadir}`;
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      // --- Other Functions ---
+      async function takeAbsen(tipe) {
+        const now = new Date();
+        const h = now.getHours();
+        if (tipe === "Pulang" && (h < jamPulangBuka || h >= jamPulangTutup)) {
+          return alert(
+            `Belum waktunya pulang! (${jamPulangBuka}:00 - ${jamPulangTutup}:00)`,
+          );
+        }
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+          const uLat = pos.coords.latitude;
+          const uLon = pos.coords.longitude;
+          const dist = calculateDistance(uLat, uLon, SCHOOL_LAT, SCHOOL_LON);
+          if (dist > MAX_DISTANCE)
+            return alert(`Terlalu jauh! (${Math.round(dist)}m)`);
+
+          const cvs = document.getElementById("canvas");
+          cvs.width = 400;
+          cvs.height = 400;
+          const ctx = cvs.getContext("2d");
+          // Flip hanya untuk penyimpanan foto (archive)
+          ctx.translate(400, 0);
+          ctx.scale(-1, 1);
+          ctx.drawImage(document.getElementById("video"), 0, 0, 400, 400);
+          const img = cvs.toDataURL("image/webp", 0.5);
+
+          await _supabase.from("presensi").insert([
+            {
+              nama_guru: currentUser,
+              tipe: tipe,
+              keterangan:
+                tipe === "Masuk" && h >= 7 ? "Terlambat" : "Tepat Waktu",
+              foto: img,
+              latitude: uLat,
+              longitude: uLon,
+            },
+          ]);
+          alert("Berhasil!");
+          checkTodayPresence();
+        });
+      }
+
+      async function takeIzin() {
+        const al = prompt("Alasan Izin/Sakit:");
+        if (!al) return;
+        await _supabase
+          .from("presensi")
+          .insert([{ nama_guru: currentUser, tipe: "Izin", keterangan: al }]);
+        alert("Izin terkirim!");
+        checkTodayPresence();
+      }
+
+      async function checkTodayPresence() {
+        const tgl = new Date().toISOString().split("T")[0];
+        const { data } = await _supabase
+          .from("presensi")
+          .select("tipe")
+          .eq("nama_guru", currentUser)
+          .gte("created_at", tgl);
+        if (data.some((d) => d.tipe === "Masuk" || d.tipe === "Izin")) {
+          const btnM = document.getElementById("btn-masuk");
+          const btnI = document.getElementById("btn-izin");
+          if (btnM) {
+            btnM.classList.add("btn-disabled");
+            btnM.onclick = null;
+          }
+          if (btnI) {
+            btnI.classList.add("btn-disabled");
+            btnI.onclick = null;
+          }
+        }
+        if (data.some((d) => d.tipe === "Pulang")) {
+          const btnP = document.getElementById("btn-pulang");
+          if (btnP) {
+            btnP.classList.add("btn-disabled");
+            btnP.onclick = null;
+          }
+        }
+      }
+
+      function updateClock() {
+        const n = new Date();
+        const h = n.getHours();
+        const clockEl = document.getElementById("clock");
+        const dateEl = document.getElementById("date");
+        if (clockEl)
+          clockEl.innerText = n.toLocaleTimeString("id-ID", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        if (dateEl) {
+          const weekday = n.toLocaleDateString("id-ID", { weekday: "long" });
+          const day = n.getDate();
+          const month = n.toLocaleDateString("id-ID", { month: "long" });
+          dateEl.innerText = `${weekday.toUpperCase()}, ${day} ${month.toUpperCase()}`;
+        }
+
+        const btnP = document.getElementById("btn-pulang");
+        const msgP = document.getElementById("lock-msg");
+        if (btnP) {
+          if (h >= jamPulangBuka && h < jamPulangTutup) {
+            btnP.classList.remove("btn-disabled");
+            if (msgP) msgP.innerText = "Tombol pulang sudah aktif";
+          } else {
+            btnP.classList.add("btn-disabled");
+            if (msgP)
+              msgP.innerText = `Tombol aktif jam ${jamPulangBuka}:00 - ${jamPulangTutup}:00`;
+          }
+        }
+      }
+
+      async function loadSchoolData() {
+       try {
+        const { data, error } = await _supabase
+            .from('pengaturan')
+            .select('*')
+            .single();
+
+        if (data) {
+            // Update Nama Sekolah
+            if(document.getElementById("school-name")) {
+                document.getElementById("school-name").innerText = data.nama_sekolah || "SDIT AL FIKRI";
+            }
+            
+            // Update Running Text (Marquee)
+            const marqueeContainer = document.querySelector(".marquee-inner");
+            if (marqueeContainer && data.info_kegiatan) {
+                // Kita ulangi teksnya 3x agar animasi marquee tidak kosong saat berjalan
+                const separator = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"; 
+const teksInfo = data.info_kegiatan + separator + data.info_kegiatan + separator + data.info_kegiatan + separator;
+                marqueeContainer.innerHTML = teksInfo;
+            }
+
+            // Isi default di textarea admin agar sinkron
+            if(document.getElementById("info-kegiatan")) {
+                document.getElementById("info-kegiatan").value = data.info_kegiatan || "";
+            }
+        }
+    } catch (err) {
+        console.error("Gagal memuat data sekolah:", err);
+    }
+}
+
+      async function saveInfoKegiatan() {
+    const info = document.getElementById("info-kegiatan").value;
+    if (!info) return alert("Isi info terlebih dahulu!");
+
+    // Asumsi tabel 'pengaturan' sudah ada dengan kolom 'id', 'nama_sekolah', 'info_kegiatan'
+    const { error } = await _supabase
+        .from('pengaturan')
+        .update({ info_kegiatan: info })
+        .eq('id', 1); // Sesuaikan ID pengaturan sekolah Anda
+
+    if (error) {
+        alert("Gagal menyimpan: " + error.message);
+    } else {
+        alert("Info Kegiatan Berhasil Diperbarui!");
+        loadSchoolData(); // Update tampilan lokal
+    }
+}
+
+      function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3;
+        const d1 = (lat1 * Math.PI) / 180;
+        const d2 = (lat2 * Math.PI) / 180;
+        const df = ((lat2 - lat1) * Math.PI) / 180;
+        const dl = ((lon2 - lon1) * Math.PI) / 180;
+        const a =
+          Math.sin(df / 2) ** 2 +
+          Math.cos(d1) * Math.cos(d2) * Math.sin(dl / 2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      }
+
+      function viewPhoto(img, title) {
+        document.getElementById("modal-img").src = img;
+        document.getElementById("modal-title").innerText = title;
+        document.getElementById("photo-modal").style.display = "flex";
+      }
+
+      function startCamera() {
+        navigator.mediaDevices
+          .getUserMedia({ video: { facingMode: "user" } })
+          .then((s) => (document.getElementById("video").srcObject = s))
+          .catch((err) => console.log("Kamera tidak aktif"));
+      }
+
+      function showProfile() {
+        showScreen("profile-page");
+        document.getElementById("p-img").src =
+          userData.foto_avatar ||
+          `https://ui-avatars.com/api/?name=${userData.nama_lengkap}`;
+      }
+
+      async function handleRegister() {
+        const n = document.getElementById("reg-nama").value;
+        const u = document.getElementById("reg-user").value;
+        const p = document.getElementById("reg-pass").value;
+        await _supabase
+          .from("profil_guru")
+          .insert([{ username: u, password: p, nama_lengkap: n }]);
+        alert("Berhasil!");
+        showScreen("login-screen");
+      }
+
+      async function saveTimeSettings() {
+        const b = document.getElementById("set-jam-buka").value;
+        const t = document.getElementById("set-jam-tutup").value;
+        if (!b || !t) return alert("Isi jam!");
+        await _supabase
+          .from("pengaturan")
+          .update({ jam_pulang_mulai: b, jam_pulang_selesai: t })
+          .eq("id", 1);
+        alert("Berhasil!");
+        location.reload();
+      }
+
+      async function exportDataHorizontal() {
+        try {
+          // 1. Ambil Tanggal Hari Ini (Format YYYY-MM-DD)
+          const tgl = new Date().toISOString().split("T")[0];
+
+          // 2. Ambil Data Guru dan Data Presensi Hari Ini
+          const { data: gurus } = await _supabase
+            .from("profil_guru")
+            .select("username, nama_lengkap")
+            .order("nama_lengkap");
+          const { data: pres } = await _supabase
+            .from("presensi")
+            .select("*")
+            .gte("created_at", tgl);
+
+          if (!pres || pres.length === 0)
+            return alert("Belum ada data absen untuk hari ini.");
+
+          // 3. Mapping Data Menjadi Horizontal (Satu Guru Satu Baris)
+          const reportData = gurus.map((g) => {
+            // Cari data masuk/izin
+            const m = pres.find(
+              (x) =>
+                x.nama_guru === g.username &&
+                (x.tipe === "Masuk" || x.tipe === "Izin"),
+            );
+            // Cari data pulang
+            const p = pres.find(
+              (x) => x.nama_guru === g.username && x.tipe === "Pulang",
+            );
+
+            return {
+              "NAMA GURU": g.nama_lengkap,
+              STATUS: m
+                ? m.tipe === "Izin"
+                  ? "IZIN: " + m.keterangan
+                  : m.keterangan
+                : "ALFA",
+              "JAM MASUK": m
+                ? new Date(m.created_at).toLocaleTimeString("id-ID", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "--:--",
+              "JAM PULANG": p
+                ? new Date(p.created_at).toLocaleTimeString("id-ID", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "--:--",
+              TANGGAL: tgl,
+            };
+          });
+
+          // 4. Proses konversi ke Excel menggunakan library XLSX
+          const worksheet = XLSX.utils.json_to_sheet(reportData);
+          const workbook = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Presensi");
+
+          // 5. Download File
+          XLSX.writeFile(workbook, `Rekap_Presensi_${tgl}.xlsx`);
+        } catch (err) {
+          console.error("Error Export:", err);
+          alert("Gagal mengunduh rekap. Pastikan koneksi internet stabil.");
+        }
+      }
+    </script>
+  </body>
+</html>
 <!DOCTYPE html>
 <html lang="id">
 <head>
