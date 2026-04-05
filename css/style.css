@@ -1,0 +1,369 @@
+      @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap");
+
+        .header-profile {
+        background: #0f766e;
+        padding: 14px 16px;
+        border-radius: 0;
+        box-shadow: none;
+        color: #ffffff;
+        border: 0;
+        margin: 0 0 16px;
+        min-height: 72px;
+      }
+
+      #user-display {
+        font-size: 1.14rem;
+        color: #ffffff !important;
+        font-weight: 900;
+        line-height: 1.05;
+        text-transform: none;
+        letter-spacing: 0.5px;
+        text-decoration: underline;
+        text-decoration-color: rgba(255, 255, 255, 0.6);
+        text-decoration-thickness: 2px;
+        text-underline-offset: 4px;
+      }
+
+      #user-role, #user-role-display {
+        font-size: 0.74rem;
+        color: #d9f99d !important;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-top: 1px;
+      }
+
+       .header-profile img {
+        border: 2px solid rgba(255, 255, 255, 0.3);
+      }
+      /* Container Utama App */
+      body, #main-app, #admin-panel, #profile-page, #attendance-dashboard {
+        background: linear-gradient(135deg, #e6fffa 0%, #dcfdf6 40%, #bbf7d0 100%);
+        color: #0f172a;
+        min-height: 100vh;
+      }
+      #main-app, #admin-panel, #profile-page, #attendance-dashboard {
+        padding: 18px 16px 24px;
+        border-radius: 18px;
+      }
+      #admin-panel, #profile-page, #attendance-dashboard {
+        border: 1px solid rgba(15, 118, 110, 0.14);
+        box-shadow: 0 14px 30px rgba(15, 118, 110, 0.08);
+      }
+      #main-app {
+        padding: 25px !important;
+      }
+
+      /* Styling Jam Utama */
+      .date-time-banner {
+        background: linear-gradient(90deg, #effaf5 0%, #d3f8e2 50%, #eafaf9 100%);
+        border: 2px solid rgba(22, 163, 74, 0.55);
+        border-radius: 16px;
+        padding: 10px 12px;
+        margin-bottom: 12px;
+        box-shadow: 0 0 12px rgba(22, 163, 74, 0.2);
+      }
+
+      .date-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 6px;
+      }
+
+      .date-label {
+        font-size: 0.95rem;
+        color: #144b3d;
+        font-weight: 800;
+        line-height: 1.05;
+        max-width: 65%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-transform: uppercase;
+      }
+
+      .time-label {
+        font-size: 2.1rem;
+        color: #064e3b;
+        font-weight: 900;
+        line-height: 1;
+        text-align: right;
+        min-width: 90px;
+      }
+
+      .running-text {
+        position: relative;
+        height: 28px;
+        overflow: hidden;
+        color: #055f46;
+        font-weight: 700;
+        font-size: 0.78rem;
+        margin-top: 0;
+        background: linear-gradient(90deg, #d1fae5 0%, #bbf7d0 48%, #f0fdf4 100%);
+        border: 1px solid #86efac;
+        border-radius: 12px;
+        padding: 6px 12px;
+      }
+
+      .running-text .marquee-inner {
+        display: inline-block;
+        padding-left: 100%;
+        animation: marquee 9.5s linear infinite;
+        white-space: nowrap;
+        color: #065f46;
+      }
+
+      .time-label {
+        font-size: 1.75rem;
+        color: #064e3b;
+        font-weight: 800;
+      }
+
+      
+      @keyframes marquee {
+        from {
+          transform: translateX(0%);
+        }
+        to {
+          transform: translateX(-100%);
+        }
+      }
+
+      /* Box Kamera yang lebih estetik (padukan dengan style di bawah, hapus duplikat) */
+      .camera-box {
+        margin: 20px auto 15px;
+        width: 90%;
+        max-width: 320px;
+        aspect-ratio: 1 / 1;
+        height: auto;
+        border-radius: 50%;
+        overflow: hidden;
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        border: 5px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        position: relative;
+      }
+      .camera-box::before {
+        content: "";
+        position: absolute;
+        inset: 8px;
+        border-radius: 50%;
+        border: 1px dashed rgba(156, 163, 175, 0.45);
+        pointer-events: none;
+      }
+
+      #video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: scaleX(-1); /* Tambahkan ini agar kamera tidak terbalik */
+  -webkit-transform: scaleX(-1);
+      }
+
+      /* Pesan Status di Bawah */
+      #lock-msg {
+        background: rgba(99, 102, 241, 0.05);
+        padding: 10px;
+        border-radius: 12px;
+        font-weight: 600;
+        color: #6366f1;
+        border: 1px dashed rgba(99, 102, 241, 0.2);
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        font-family: "Plus Jakarta Sans", sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      @keyframes gradientBG {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .app-shell {
+        width: 95%;
+        max-width: 430px;
+        height: 92vh;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        border-radius: 35px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        position: relative;
+        border: 4px solid white;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .school-banner {
+    padding: 20px; text-align: center;
+    background: transparent; border: none;
+    margin-bottom: 0;
+}
+
+#school-name { font-size: 24px !important; color: #1e88e5; letter-spacing: 0.5px; }
+
+
+      #login-screen,
+      #register-screen,
+      #main-app,
+      #admin-panel,
+      #profile-page {
+        display: none;
+        padding: 20px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* --- STYLE BARU UNTUK ADMIN SESUAI GAMBAR --- */
+      /* --- GANTI KODE INI DI DALAM TAG <STYLE> --- */
+
+      /* Kotak Foto Presensi yang Lebih Elegan */
+      .admin-thumb-box {
+        width: 55px;
+        height: 55px;
+        border-radius: 12px;
+
+        /* GANTI BARIS INI: Dari 2px solid #000 menjadi border tipis transparan */
+        border: 1px solid rgba(0, 0, 0, 0.1);
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background: #fcfcfc; /* Warna background sedikit lebih soft */
+        cursor: pointer;
+
+        /* TAMBAHKAN INI: Efek bayangan halus agar lebih elegan */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+        transition: all 0.2s ease;
+      }
+
+      /* TAMBAHKAN INI: Efek saat kursor di atasnya (hover) */
+      .admin-thumb-box:hover {
+        border-color: rgba(
+          99,
+          102,
+          241,
+          0.3
+        ); /* Warna primary tipis saat hover */
+        box-shadow: 0 4px 10px rgba(99, 102, 241, 0.1);
+      }
+
+      .admin-thumb-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      /* Ukuran Jam: Dibuat pas, tidak menutupi elemen lain */
+      .waktu-teks {
+        font-size: 18px !important; /* Ukuran diturunkan agar elegan */
+        font-weight: 800;
+        color: #1e293b;
+        line-height: 1.2;
+      }
+
+      /* Label Kecil di atas jam */
+      .label-jam {
+        font-size: 9px !important;
+        color: #94a3b8;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+        text-transform: uppercase;
+      }
+
+      /* Keterangan Terlambat: Dibuat kecil & manis */
+      .badge-terlambat {
+        background-color: rgba(239, 68, 68, 0.1); /* Merah transparan */
+        color: #ef4444;
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-size: 8px !important; /* Sangat kecil agar tidak dominan */
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        margin-top: 4px;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+      }
+      /* (Camera styling sudah ditetapkan di atas, baris lama dihapus agar tidak konflik) */
+      .cool-btn {
+        border: none;
+        border-radius: 20px;
+        padding: 15px;
+        color: white;
+        font-weight: 800;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: 0.3s;
+        text-decoration: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      .btn-masuk {
+        background: linear-gradient(135deg, #10b981, #059669);
+      }
+      .btn-izin {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+      }
+      .btn-pulang {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        width: 100%;
+        margin-top: 10px;
+        flex-direction: row;
+        gap: 10px;
+        justify-content: center;
+      }
+      .btn-disabled {
+        background: #cbd5e1 !important;
+        color: #64748b !important;
+        opacity: 0.6;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      #photo-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .modal-content-img {
+        background: white;
+        padding: 15px;
+        border-radius: 25px;
+        width: 100%;
+        max-width: 350px;
+        text-align: center;
+      }
+
+      .app-shell::-webkit-scrollbar {
+        width: 0;
+        background: transparent;
+      }
