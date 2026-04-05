@@ -71,16 +71,6 @@
             <button class="btn btn-link text-white-50 p-0" onclick="logout()"><i class="fas fa-power-off"></i></button>
         </div>
 
-        <div class="date-time-banner mb-3">
-            <div class="date-top">
-                <span id="date" class="date-label">-</span>
-                <span id="clock" class="time-label">00:00</span>
-            </div>
-            <div id="marquee" class="running-text">
-                <span class="marquee-inner" id="info-teks">Memuat informasi kegiatan...</span>
-            </div>
-        </div>
-
         <div class="camera-box mb-3">
             <video id="video" autoplay playsinline class="w-100 rounded-4"></video>
         </div>
@@ -733,7 +723,7 @@ async function loadSchoolData() {
         if (st) {
             // 1. Update Informasi Umum
             if (document.getElementById("school-name")) {
-                document.getElementById("school-name").innerText = st.nama_sekolah || "Nama Sekolah";
+                document.getElementById("school-name").innerText = st.nama_sekolah || "SDIT AL FIKRI";
             }
             const marquee = document.getElementById("info-teks");
             if (marquee && st.info_kegiatan) {
