@@ -777,7 +777,7 @@ async function loadSchoolData() {
     const { error } = await _supabase
         .from('pengaturan')
         .update({ info_kegiatan: info })
-        .eq('id', 'is_libur'); // Sesuaikan ID pengaturan sekolah Anda
+        .eq('id', 1); // Sesuaikan ID pengaturan sekolah Anda
 
     if (error) {
         alert("Gagal menyimpan: " + error.message);
