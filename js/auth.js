@@ -1,6 +1,12 @@
 async function handleLogin() {
-  const u = document.getElementById("login-user").value;
+  const u = document.getElementById("login-user").value.trim();
   const p = document.getElementById("login-pass").value;
+
+  if (!u || !p) {
+    alert("Username dan password wajib diisi.");
+    return;
+  }
+
   const { data: adm } = await _supabase
     .from("admin_users")
     .select("*")
@@ -8,23 +14,29 @@ async function handleLogin() {
     .eq("password", p)
     .single();
   if (adm) {
-    localStorage.setItem("guru_user", u);
-    localStorage.setItem("guru_pass", p);
-    showScreen("admin-panel");
-    loadAdminDashboard();
+    const adminData = {
+      ...adm,
+      nama_lengkap: adm.nama_lengkap || adm.username,
+      jabatan: adm.role === "superadmin" ? "SUPER ADMIN" : "ADMIN MONITORING",
+      password: p,
+    };
+    await processLogin(adminData, adm.role || "admin");
     return;
   }
+
   const { data: guru } = await _supabase
     .from("profil_guru")
     .select("*")
     .eq("username", u)
     .eq("password", p)
     .single();
+
   if (guru) {
-    localStorage.setItem("guru_user", u);
-    localStorage.setItem("guru_pass", p);
-    processLogin(guru);
-  } else alert("Login Gagal!");
+    await processLogin(guru, "guru");
+    return;
+  }
+
+  alert("Login Gagal!");
 }
 
 async function handleRegister() {
@@ -50,6 +62,12 @@ function togglePass(id, el) {
 }
 
 function logout() {
-  localStorage.clear();
+  if (typeof clearLoginStorage === "function") {
+    clearLoginStorage();
+  } else {
+    localStorage.removeItem("session_presensi");
+    localStorage.removeItem("guru_user");
+    localStorage.removeItem("guru_pass");
+  }
   location.reload();
 }
