@@ -481,11 +481,38 @@
       let jamPulangBuka = 14;
       let jamPulangTutup = 17;
 
-      window.onload = () => {
+      function getStoredSession() {
+        const savedSession = localStorage.getItem("session_presensi");
+        if (!savedSession) return null;
+
+        try {
+          return JSON.parse(savedSession);
+        } catch (error) {
+          console.error("Sesi tersimpan tidak valid:", error);
+          localStorage.removeItem("session_presensi");
+          return null;
+        }
+      }
+
+      function persistLegacyLogin(username, password) {
+        if (!username || !password) return;
+        localStorage.setItem("guru_user", username);
+        localStorage.setItem("guru_pass", password);
+      }
+
+      function clearLoginStorage() {
+        localStorage.removeItem("session_presensi");
+        localStorage.removeItem("guru_user");
+        localStorage.removeItem("guru_pass");
+      }
+
+      function initializeApp() {
         updateClock();
         setInterval(updateClock, 1000);
         checkAutoLogin();
-      };
+      }
+
+      window.addEventListener("DOMContentLoaded", initializeApp);
 
       function showScreen(id) {
         const screens = [
@@ -554,6 +581,7 @@
       // 3. Fungsi Load Riwayat (Sesuai Struktur Admin: Masuk Kiri, Pulang Kanan)
       async function loadUserHistory() {
         const container = document.getElementById("user-history-list");
+        if (!container) return;
         container.innerHTML =
           '<p class="text-center small text-muted py-3">Memuat riwayat...</p>';
 
@@ -650,6 +678,9 @@
       // 5. LOAD MONTHLY HISTORY DASHBOARD
       async function loadMonthlyHistory() {
         const monthFilter = document.getElementById("month-filter");
+        const container = document.getElementById("history-list-monthly");
+        if (!monthFilter || !container) return;
+
         if (!monthFilter.value) {
           const now = new Date();
           monthFilter.value = now.toISOString().slice(0, 7);
@@ -666,7 +697,6 @@
           59,
         ).toISOString();
 
-        const container = document.getElementById("history-list-monthly");
         container.innerHTML =
           '<p class="text-center text-muted py-4">Memuat riwayat...</p>';
 
@@ -761,6 +791,14 @@
       }
 
       async function checkAutoLogin() {
+        const savedSession = getStoredSession();
+        if (savedSession?.data && savedSession?.role) {
+          await processLogin(savedSession.data, savedSession.role, {
+            skipPersist: true,
+          });
+          return;
+        }
+
         const u = localStorage.getItem("guru_user");
         const p = localStorage.getItem("guru_pass");
 
@@ -770,7 +808,7 @@
         }
 
         // CEK TABEL ADMIN_USERS
-        const { data: adm, error: errAdm } = await _supabase
+        const { data: adm } = await _supabase
           .from("admin_users")
           .select("*")
           .eq("username", u)
@@ -785,21 +823,24 @@
             jabatan:
               adm.role === "superadmin" ? "SUPER ADMIN" : "ADMIN MONITORING",
           };
-          processLogin(adminData, adm.role || "admin");
+          await processLogin(adminData, adm.role || "admin", {
+            skipPersist: false,
+          });
           return;
         }
 
-        // CEK TABEL PROFIL (GURU)
-        const { data: guru, error: errGuru } = await _supabase
-          .from("profil")
+        // CEK TABEL PROFIL GURU
+        const { data: guru } = await _supabase
+          .from("profil_guru")
           .select("*")
           .eq("username", u)
           .eq("password", p)
           .single();
 
         if (guru) {
-          processLogin(guru, "guru");
+          await processLogin(guru, "guru", { skipPersist: false });
         } else {
+          clearLoginStorage();
           showScreen("login-screen");
         }
       }
@@ -818,11 +859,19 @@
         }
       }
 
-      async function processLogin(data, role) {
-        localStorage.setItem(
-          "session_presensi",
-          JSON.stringify({ data, role }),
-        );
+      async function processLogin(data, role, options = {}) {
+        const { skipPersist = false } = options;
+
+        if (!skipPersist) {
+          localStorage.setItem(
+            "session_presensi",
+            JSON.stringify({ data, role }),
+          );
+          if (data.username && data.password) {
+            persistLegacyLogin(data.username, data.password);
+          }
+        }
+
         currentUser = data.username;
         userData = data;
         userRole = role;
@@ -849,6 +898,12 @@
         const profileImg = document.getElementById("p-img");
         if (profileImg) profileImg.src = avatarUrl;
 
+        const editNama = document.getElementById("edit-nama");
+        if (editNama) editNama.value = data.nama_lengkap || "";
+
+        const editJabatan = document.getElementById("edit-jabatan");
+        if (editJabatan) editJabatan.value = data.jabatan || "";
+
         // 2. Jika dia Admin atau Superadmin
         if (role === "admin" || role === "superadmin") {
           // PINDAH LAYAR DULU agar elemen 'list-admin-view' aktif
@@ -869,9 +924,9 @@
           // Logika Guru
           showScreen("main-app");
           startCamera();
-          checkTodayPresence();
+          await loadSchoolData();
+          await checkTodayPresence();
           loadUserHistory();
-          loadSchoolData();
         }
       }
       // --- FIXED ADMIN DASHBOARD ---
@@ -1349,11 +1404,10 @@
       }
 
       async function toggleLibur(status) {
-        // Pastikan ID-nya sesuai dengan yang ada di tabel settings kamu (biasanya 1)
         const { error } = await _supabase
-          .from("settings")
+          .from("pengaturan")
           .update({ is_libur: status })
-          .eq("id", "is_libur");
+          .eq("id", 1);
 
         if (!error) {
           alert(
@@ -1449,7 +1503,7 @@
                     minute: "2-digit",
                   })
                 : "--:--",
-              TANGGAL: tgl,
+              TANGGAL: tglNamaFile,
             };
           });
 
@@ -1459,36 +1513,12 @@
           XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Presensi");
 
           // 5. Download File
-          XLSX.writeFile(workbook, `Rekap_Presensi_${tgl}.xlsx`);
+          XLSX.writeFile(workbook, `Rekap_Presensi_${tglNamaFile}.xlsx`);
         } catch (err) {
           console.error("Error Export:", err);
           alert("Gagal mengunduh rekap. Pastikan koneksi internet stabil.");
         }
       }
-
-      // Fungsi untuk mengecek apakah user sudah pernah login sebelumnya
-      window.addEventListener("DOMContentLoaded", () => {
-        const savedSession = localStorage.getItem("session_presensi");
-
-        if (savedSession) {
-          try {
-            const { data, role } = JSON.parse(savedSession);
-            console.log("Sesi ditemukan, mempersiapkan login otomatis...");
-
-            // Beri jeda sedikit agar DOM/HTML benar-benar siap 100%
-            setTimeout(() => {
-              processLogin(data, role);
-            }, 500);
-          } catch (e) {
-            console.error("Sesi rusak:", e);
-            localStorage.removeItem("session_presensi");
-            showScreen("login-page"); // Pastikan balik ke login jika gagal
-          }
-        } else {
-          // Jika tidak ada sesi, pastikan tetap di halaman login
-          showScreen("login-page");
-        }
-      });
     </script>
 
     <script src="js/auth.js"></script>
