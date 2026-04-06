@@ -556,7 +556,9 @@ async function processLogin(data, role) {
             return; // Berhenti di sini jika elemen belum ada di layar
         }
 
-        const tgl = new Date().toISOString().split("T")[0];
+        const kini = new Date();
+const startOfDay = new Date(kini.getFullYear(), kini.getMonth(), kini.getDate(), 0, 0, 0);
+const tglISO = startOfDay.toISOString();
 
         // 2. AMBIL DATA DARI SUPABASE
         const { data: gurus, error: errG } = await _supabase
@@ -567,7 +569,7 @@ async function processLogin(data, role) {
         const { data: pres, error: errP } = await _supabase
             .from("presensi")
             .select("*")
-            .gte("created_at", tgl);
+            .gte("created_at", tglISO);
 
         if (errG || errP) throw new Error("Gagal mengambil data dari database");
 
@@ -637,84 +639,190 @@ async function processLogin(data, role) {
 }
 
       // --- Other Functions ---
-      async function takeAbsen(tipe) {
-        const now = new Date();
-        const h = now.getHours();
-        if (tipe === "Pulang" && (h < jamPulangBuka || h >= jamPulangTutup)) {
-          return alert(
-            `Belum waktunya pulang! (${jamPulangBuka}:00 - ${jamPulangTutup}:00)`,
-          );
+      // --- 1. FUNGSI CEK STATUS (MENGUNCI TOMBOL) ---
+async function checkTodayPresence() {
+    // Ambil tanggal hari ini format YYYY-MM-DD (Waktu Indonesia)
+    const n = new Date();
+    const tgl = new Date(n.getTime() - (n.getTimezoneOffset() * 60000)).toISOString().split("T")[0];
+
+    try {
+        const { data, error } = await _supabase
+            .from("presensi")
+            .select("tipe")
+            .eq("nama_guru", currentUser)
+            .gte("created_at", tgl);
+
+        if (error) throw error;
+
+        // Reset tombol ke keadaan aktif dulu sebelum dicek
+        const btnM = document.getElementById("btn-masuk");
+        const btnI = document.getElementById("btn-izin");
+        const btnP = document.getElementById("btn-pulang");
+
+        if (data && data.length > 0) {
+            const sudahMasuk = data.some((d) => d.tipe === "Masuk");
+            const sudahIzin = data.some((d) => d.tipe === "Izin");
+            const sudahPulang = data.some((d) => d.tipe === "Pulang");
+
+            // Jika sudah Masuk ATAU sudah Izin
+            if (sudahMasuk || sudahIzin) {
+                if (btnM) {
+                    btnM.classList.add("btn-disabled");
+                    btnM.onclick = null;
+                    btnM.innerText = sudahIzin ? "STATUS: IZIN" : "SUDAH MASUK";
+                }
+                if (btnI) {
+                    btnI.classList.add("btn-disabled");
+                    btnI.onclick = null;
+                }
+            }
+
+            // Jika sudah Pulang ATAU sedang Izin (Izin tidak perlu absen pulang)
+            if (sudahPulang || sudahIzin) {
+                if (btnP) {
+                    btnP.classList.add("btn-disabled");
+                    btnP.onclick = null;
+                    btnP.innerText = sudahIzin ? "TIDAK PERLU" : "SUDAH PULANG";
+                }
+            }
         }
-        navigator.geolocation.getCurrentPosition(async (pos) => {
-          const uLat = pos.coords.latitude;
-          const uLon = pos.coords.longitude;
-          const dist = calculateDistance(uLat, uLon, SCHOOL_LAT, SCHOOL_LON);
-          if (dist > MAX_DISTANCE)
-            return alert(`Terlalu jauh! (${Math.round(dist)}m)`);
+    } catch (err) {
+        console.error("Gagal cek status kehadiran:", err.message);
+    }
+}
 
-          const cvs = document.getElementById("canvas");
-          cvs.width = 400;
-          cvs.height = 400;
-          const ctx = cvs.getContext("2d");
-          // Flip hanya untuk penyimpanan foto (archive)
-          ctx.translate(400, 0);
-          ctx.scale(-1, 1);
-          ctx.drawImage(document.getElementById("video"), 0, 0, 400, 400);
-          const img = cvs.toDataURL("image/webp", 0.5);
+// --- 2. FUNGSI AMBIL ABSEN (MASUK/PULANG) ---
+async function takeAbsen(tipe) {
+    const now = new Date();
+    const h = now.getHours();
 
-          await _supabase.from("presensi").insert([
+    // Validasi Jam Pulang
+    if (tipe === "Pulang" && (h < jamPulangBuka || h >= jamPulangTutup)) {
+        return alert(`Belum waktunya pulang! (${jamPulangBuka}:00 - ${jamPulangTutup}:00)`);
+    }
+
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+        const uLat = pos.coords.latitude;
+        const uLon = pos.coords.longitude;
+        const dist = calculateDistance(uLat, uLon, SCHOOL_LAT, SCHOOL_LON);
+
+        if (dist > MAX_DISTANCE) {
+            return alert(`Terlalu jauh! (${Math.round(dist)}m dari sekolah)`);
+        }
+
+        // Proses Foto
+        const cvs = document.getElementById("canvas");
+        cvs.width = 400;
+        cvs.height = 400;
+        const ctx = cvs.getContext("2d");
+        ctx.translate(400, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(document.getElementById("video"), 0, 0, 400, 400);
+        const img = cvs.toDataURL("image/webp", 0.5);
+
+        // Tentukan Keterangan Terlambat (Masuk > 07:00)
+        let ket = "Tepat Waktu";
+        if (tipe === "Masuk" && h >= 7) {
+            ket = "Terlambat";
+        }
+
+        const { error } = await _supabase.from("presensi").insert([
             {
-              nama_guru: currentUser,
-              tipe: tipe,
-              keterangan:
-                tipe === "Masuk" && h >= 7 ? "Terlambat" : "Tepat Waktu",
-              foto: img,
-              latitude: uLat,
-              longitude: uLon,
+                nama_guru: currentUser,
+                tipe: tipe,
+                keterangan: ket,
+                foto: img,
+                latitude: uLat,
+                longitude: uLon,
             },
-          ]);
-          alert("Berhasil!");
-          checkTodayPresence();
-        });
-      }
+        ]);
 
-      async function takeIzin() {
-        const al = prompt("Alasan Izin/Sakit:");
-        if (!al) return;
-        await _supabase
-          .from("presensi")
-          .insert([{ nama_guru: currentUser, tipe: "Izin", keterangan: al }]);
-        alert("Izin terkirim!");
-        checkTodayPresence();
-      }
+        if (error) {
+            alert("Gagal: " + error.message);
+        } else {
+            alert(`Absen ${tipe} Berhasil!`);
+            checkTodayPresence(); // Kunci tombol setelah berhasil
+        }
+    }, (err) => {
+        alert("Gagal mengambil lokasi. Pastikan GPS aktif dan izin lokasi diberikan!");
+    });
+}
 
-      async function checkTodayPresence() {
-        const tgl = new Date().toISOString().split("T")[0];
-        const { data } = await _supabase
-          .from("presensi")
-          .select("tipe")
-          .eq("nama_guru", currentUser)
-          .gte("created_at", tgl);
-        if (data.some((d) => d.tipe === "Masuk" || d.tipe === "Izin")) {
-          const btnM = document.getElementById("btn-masuk");
-          const btnI = document.getElementById("btn-izin");
-          if (btnM) {
-            btnM.classList.add("btn-disabled");
-            btnM.onclick = null;
-          }
-          if (btnI) {
-            btnI.classList.add("btn-disabled");
-            btnI.onclick = null;
-          }
+// --- 3. FUNGSI IZIN ---
+async function takeIzin() {
+    const al = prompt("Alasan Izin/Sakit:");
+    if (!al) return;
+
+    const { error } = await _supabase.from("presensi").insert([
+        { 
+            nama_guru: currentUser, 
+            tipe: "Izin", 
+            keterangan: al,
+            foto: null 
         }
-        if (data.some((d) => d.tipe === "Pulang")) {
-          const btnP = document.getElementById("btn-pulang");
-          if (btnP) {
-            btnP.classList.add("btn-disabled");
-            btnP.onclick = null;
-          }
+    ]);
+
+    if (error) {
+        alert("Gagal kirim izin: " + error.message);
+    } else {
+        alert("Izin berhasil terkirim!");
+        checkTodayPresence(); // Kunci tombol setelah berhasil
+    }
+}
+async function checkTodayPresence() {
+    try {
+        // 1. Buat objek waktu saat ini di WIB
+        const kini = new Date();
+        
+        // 2. Tentukan jam 00:00:00 hari ini dalam waktu lokal (WIB)
+        const startOfDay = new Date(kini.getFullYear(), kini.getMonth(), kini.getDate(), 0, 0, 0);
+        
+        // 3. Konversi ke ISO String (Ini akan otomatis menjadi UTC yang dimengerti Supabase)
+        // Contoh: Jam 00:00 WIB akan dikonversi menjadi jam 17:00 UTC hari sebelumnya
+        const tglISO = startOfDay.toISOString(); 
+
+        const { data, error } = await _supabase
+            .from("presensi")
+            .select("tipe")
+            .eq("nama_guru", currentUser)
+            .gte("created_at", tglISO); // Mencari yang lebih dari atau sama dengan jam 00:00 WIB tadi
+
+        if (error) throw error;
+
+        // --- Logika Penguncian Tombol ---
+        if (data && data.length > 0) {
+            const sudahMasuk = data.some((d) => d.tipe === "Masuk");
+            const sudahIzin = data.some((d) => d.tipe === "Izin");
+            const sudahPulang = data.some((d) => d.tipe === "Pulang");
+
+            const btnM = document.getElementById("btn-masuk");
+            const btnI = document.getElementById("btn-izin");
+            const btnP = document.getElementById("btn-pulang");
+
+            if (sudahMasuk || sudahIzin) {
+                if (btnM) {
+                    btnM.classList.add("btn-disabled");
+                    btnM.onclick = null;
+                    btnM.innerText = sudahIzin ? "STATUS: IZIN" : "SUDAH MASUK";
+                }
+                if (btnI) {
+                    btnI.classList.add("btn-disabled");
+                    btnI.onclick = null;
+                }
+            }
+
+            if (sudahPulang || sudahIzin) {
+                if (btnP) {
+                    btnP.classList.add("btn-disabled");
+                    btnP.onclick = null;
+                    btnP.innerText = sudahIzin ? "TIDAK PERLU" : "SUDAH PULANG";
+                }
+            }
         }
-      }
+    } catch (err) {
+        console.error("Gagal cek status:", err.message);
+    }
+}
 
       function updateClock() {
         const n = new Date();
@@ -742,7 +850,7 @@ async function processLogin(data, role) {
           } else {
             btnP.classList.add("btn-disabled");
             if (msgP)
-              msgP.innerText = `Tombol aktif jam ${jamPulangBuka}:00 - ${jamPulangTutup}:00`;
+              msgP.innerText = `Tombol Pulang dibuka jam ${jamPulangBuka}:00 - ${jamPulangTutup}:00`;
           }
         }
       }
@@ -883,7 +991,10 @@ async function saveTimeSettings() {
       async function exportDataHorizontal() {
         try {
           // 1. Ambil Tanggal Hari Ini (Format YYYY-MM-DD)
-          const tgl = new Date().toISOString().split("T")[0];
+          const kini = new Date();
+const startOfDay = new Date(kini.getFullYear(), kini.getMonth(), kini.getDate(), 0, 0, 0);
+const tglISO = startOfDay.toISOString(); 
+const tglNamaFile = kini.toISOString().split("T")[0]; // Untuk nama file YYYY-MM-DD
 
           // 2. Ambil Data Guru dan Data Presensi Hari Ini
           const { data: gurus } = await _supabase
@@ -893,7 +1004,7 @@ async function saveTimeSettings() {
           const { data: pres } = await _supabase
             .from("presensi")
             .select("*")
-            .gte("created_at", tgl);
+            .gte("created_at",  tglISO);
 
           if (!pres || pres.length === 0)
             return alert("Belum ada data absen untuk hari ini.");
