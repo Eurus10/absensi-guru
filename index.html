@@ -497,9 +497,25 @@ async function processLogin(data, role) {
     userData = data;
     userRole = role;
 
-    // 1. Update Header Terlebih Dahulu
     const userDisp = document.getElementById("user-display");
     if (userDisp) userDisp.innerText = data.nama_lengkap || data.username;
+
+    const roleDisp = document.getElementById("user-role-display");
+    if (roleDisp) {
+        // Jika data.jabatan ada di database, gunakan itu. 
+        // Jika tidak ada, baru tampilkan "GURU / STAFF"
+        roleDisp.innerText = data.jabatan || "GURU / STAFF";
+    }
+
+    const avatarUrl = data.foto_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nama_lengkap || data.username)}&background=0D9488&color=fff`;
+
+    // Update foto di Header (Halaman Guru)
+    const miniAvatar = document.getElementById("mini-avatar");
+    if (miniAvatar) miniAvatar.src = avatarUrl;
+
+    // Update foto di Halaman Profil (Agar saat dibuka tidak kosong)
+    const profileImg = document.getElementById("p-img");
+    if (profileImg) profileImg.src = avatarUrl;
 
     // 2. Jika dia Admin atau Superadmin
     if (role === "admin" || role === "superadmin") {
@@ -741,6 +757,9 @@ async function loadSchoolData() {
         if (error) throw error;
 
         if (st) {
+
+          jamPulangBuka = parseInt(st.jam_pulang_mulai) || 14; 
+            jamPulangTutup = parseInt(st.jam_pulang_selesai) || 17;
             // 1. Update Informasi Umum
             if (document.getElementById("school-name")) {
                 document.getElementById("school-name").innerText = st.nama_sekolah || "SDIT FIKRI";
@@ -764,14 +783,16 @@ async function loadSchoolData() {
                     }
                 });
 
-                const lockMsg = document.getElementById("lock-msg");
+               const lockMsg = document.getElementById("lock-msg");
                 if (lockMsg) {
                     lockMsg.innerText = "SISTEM TERKUNCI: HARI LIBUR";
                     lockMsg.style.color = "#ff4d4d";
                     lockMsg.style.fontWeight = "bold";
                 }
-                
-                console.log("Status: Sekolah sedang libur. Tombol dinonaktifkan.");
+            } else {
+                // --- TAMBAHKAN INI ---
+                // Jika tidak libur, paksa update tampilan pesan jam sekarang juga
+                updateClock(); 
             }
         }
     } catch (err) {
@@ -838,17 +859,26 @@ async function loadSchoolData() {
         alert("Gagal update status: " + error.message);
     }
 }
-      async function saveTimeSettings() {
-        const b = document.getElementById("set-jam-buka").value;
-        const t = document.getElementById("set-jam-tutup").value;
-        if (!b || !t) return alert("Isi jam!");
-        await _supabase
-          .from("pengaturan")
-          .update({ jam_pulang_mulai: b, jam_pulang_selesai: t })
-          .eq("id", 1);
-        alert("Berhasil!");
-        location.reload();
-      }
+async function saveTimeSettings() {
+    const buka = document.getElementById("set-jam-buka").value; // Pastikan ID input ini benar
+    const tutup = document.getElementById("set-jam-tutup").value;
+
+    const { error } = await _supabase
+        .from('pengaturan')
+        .update({ 
+            jam_pulang_mulai: parseInt(buka), 
+            jam_pulang_selesai: parseInt(tutup) 
+        })
+        .eq('id', 1);
+
+    if (!error) {
+        alert("Jam operasional diperbarui!");
+        // Panggil fungsi muat data agar variabel global di Admin juga terupdate
+        loadSchoolData(); 
+    } else {
+        alert("Gagal: " + error.message);
+    }
+}
 
       async function exportDataHorizontal() {
         try {
