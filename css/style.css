@@ -164,13 +164,19 @@
 
       /* Pesan Status di Bawah */
       #lock-msg {
-        background: rgba(99, 102, 241, 0.05);
-        padding: 10px;
-        border-radius: 12px;
-        font-weight: 600;
-        color: #6366f1;
-        border: 1px dashed rgba(99, 102, 241, 0.2);
-      }
+    background: #ffffff !important;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 800;
+    color: #1e293b !important; /* Warna biru gelap agar terlihat jelas */
+    border: 2px dashed #6366f1;
+    text-align: center;
+    font-size: 13px;
+    margin: 15px auto;
+    width: 90%;
+    display: block;
+    min-height: 40px; /* Memastikan kotak punya ruang untuk teks */
+}
 
       body {
         margin: 0;
