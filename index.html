@@ -493,6 +493,7 @@ function setupAdminUI() {
 }
 
 async function processLogin(data, role) {
+  localStorage.setItem("session_presensi", JSON.stringify({ data, role }));
     currentUser = data.username;
     userData = data;
     userRole = role;
@@ -1057,6 +1058,31 @@ const tglNamaFile = kini.toISOString().split("T")[0]; // Untuk nama file YYYY-MM
           alert("Gagal mengunduh rekap. Pastikan koneksi internet stabil.");
         }
       }
+
+      // Fungsi untuk mengecek apakah user sudah pernah login sebelumnya
+window.addEventListener("DOMContentLoaded", () => {
+    const savedSession = localStorage.getItem("session_presensi");
+    
+    if (savedSession) {
+        try {
+            const { data, role } = JSON.parse(savedSession);
+            console.log("Sesi ditemukan, mempersiapkan login otomatis...");
+            
+            // Beri jeda sedikit agar DOM/HTML benar-benar siap 100%
+            setTimeout(() => {
+                processLogin(data, role);
+            }, 500); 
+
+        } catch (e) {
+            console.error("Sesi rusak:", e);
+            localStorage.removeItem("session_presensi");
+            showScreen("login-page"); // Pastikan balik ke login jika gagal
+        }
+    } else {
+        // Jika tidak ada sesi, pastikan tetap di halaman login
+        showScreen("login-page");
+    }
+});
     </script>
 
     <script src="js/auth.js"></script>
